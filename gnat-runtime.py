@@ -133,6 +133,21 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
 
 
 class GenericsCommand(gdb.Command):
+    """Manages manual detection for Ada generic instantiations.
+
+Pretty-printers that work on types defined in generic packages need to know
+what type comes from what generic package. This command provides a way to
+associate symbol prefixes to generic packages.
+
+Usage: generics [list]
+         Print a list of associations: symbol prefix -> generic package.
+       generics add PREFIX GENERIC
+         Associate a symbol PREFIX to a GENERIC package.
+         For instance:
+           generics add foo__int_vectors Foo.Int_Vectors
+       generics remove PREFIX
+         Remove the association of a symbol PREFIX."""
+
     NAME = 'generics'
 
     def __init__(self):
