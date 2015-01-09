@@ -1,3 +1,19 @@
+from gnat_runtime.generics import Match
+
+
+def get_rbtree_pattern(node_pattern):
+    node_access_pattern = Match.Typedef(Match.Pointer(node_pattern))
+    return Match.Struct(
+        Match.Field('_tag'),
+        Match.Field('first',  node_access_pattern),
+        Match.Field('last',   node_access_pattern),
+        Match.Field('root',   node_access_pattern),
+        Match.Field('length', Match.Integer()),
+        Match.Field('busy',   Match.Integer()),
+        Match.Field('lock',   Match.Integer()),
+    )
+
+
 def dfs(tree_value):
     """
     Return an iterator on all nodes in `tree_value`.

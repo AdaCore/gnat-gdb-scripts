@@ -1,3 +1,4 @@
+from gnat_runtime.generics import Match
 from gnat_runtime.utils import PrettyPrinter
 
 
@@ -5,8 +6,22 @@ class VectorPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Vectors.Vector values."""
 
     name            = 'Vector'
+
     generic         = 'ada.containers.vectors'
     type_tag_suffix = 'vector'
+
+    type_pattern    = Match.TypeName(suffix='__vector', pattern=Match.Struct(
+        Match.Field('_parent'),
+        Match.Field('elements', Match.Pointer(
+            Match.Struct(
+                Match.Field('last', Match.Integer()),
+                Match.Field('ea', Match.Array()),
+            )
+        )),
+        Match.Field('last', Match.Integer()),
+        Match.Field('busy', Match.Integer()),
+        Match.Field('lock', Match.Integer()),
+    ))
 
     def display_hint(self):
         return 'array'

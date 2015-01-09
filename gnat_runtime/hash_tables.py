@@ -1,4 +1,21 @@
+from gnat_runtime.generics import Match
 from gnat_runtime.utils import iter_array
+
+
+def get_htable_pattern(node_pattern):
+    # TODO: unfortunately, due to the current state of DWARF/GDB, it is not
+    # possible to reach `node_pattern` through hash table's value type.
+    return Match.Struct(
+        Match.Field('_tag'),
+        # See below for the type of `buckets`.
+        Match.Field('buckets', Match.Typedef(Match.Struct(
+            Match.Field('P_ARRAY',  Match.Pointer()),
+            Match.Field('P_BOUNDS', Match.Pointer()),
+        ))),
+        Match.Field('length', Match.Integer()),
+        Match.Field('busy',   Match.Integer()),
+        Match.Field('lock',   Match.Integer()),
+    )
 
 
 def iterate(htable_value):

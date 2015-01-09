@@ -1,7 +1,8 @@
 from itertools import count
 
-from gnat_runtime.hash_tables import iterate
-from gnat_runtime.red_black_trees import dfs
+from gnat_runtime.generics import Match
+from gnat_runtime.hash_tables import iterate, get_htable_pattern
+from gnat_runtime.red_black_trees import dfs, get_rbtree_pattern
 from gnat_runtime.utils import PrettyPrinter
 
 
@@ -34,6 +35,18 @@ class OrderedMapPrinter(BaseMapPrinter):
     generic         = 'ada.containers.ordered_maps'
     type_tag_suffix = 'map'
 
+    type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
+        Match.Field('_parent'),
+        Match.Field('tree', get_rbtree_pattern(Match.Struct(
+            Match.Field('parent', Match.Typedef(Match.Pointer())),
+            Match.Field('left',   Match.Typedef(Match.Pointer())),
+            Match.Field('right',  Match.Typedef(Match.Pointer())),
+            Match.Field('color',  Match.Enum()),
+            Match.Field('key'),
+            Match.Field('element'),
+        ))),
+    ))
+
     @property
     def length(self):
         return self.value['tree']['length']
@@ -48,6 +61,15 @@ class HashedMapPrinter(BaseMapPrinter):
     name            = 'Hashed_Map'
     generic         = 'ada.containers.hashed_maps'
     type_tag_suffix = 'map'
+
+    type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
+        Match.Field('_parent'),
+        Match.Field('ht', get_htable_pattern(Match.Struct(
+            Match.Field('key'),
+            Match.Field('element'),
+            Match.Field('next', Match.Typedef(Match.Pointer())),
+        ))),
+    ))
 
     @property
     def length(self):
