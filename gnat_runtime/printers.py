@@ -1,94 +1,10 @@
-class PrettyPrinter(object):
-    """Base class for pretty-printers."""
-
-    def __init__(self, value):
-        self.value = value
-
-
-class UnboundedStringPrinter(PrettyPrinter):
-    """Pretty-print Ada.Strings.Unbounded.Unbounded_String values."""
-
-    name     = 'Unbounded_String'
-    type_tag = 'ada__strings__unbounded__unbounded_string'
-
-    def to_string(self):
-        # Currently, it seems that the type associated to variable-length
-        # arrays in discriminated records have incorrect bounds when accessing
-        # the corresponding fields from a value.  This is why we compute
-        # manually bounds here and cast the value before returning.
-        unb_str = self.value['reference']
-        data = unb_str['data']
-
-        lower_bound = 1
-        upper_bound = int(unb_str['last'])
-        # GDB's Python API requires array length (U - L + 1) not to be
-        # negative.
-        if lower_bound > upper_bound:
-            upper_bound = lower_bound - 1
-
-        nested_type = data.type.target()
-        array_type = nested_type.array(lower_bound, upper_bound)
-        data_str = str(data.cast(array_type))
-
-        return '{} ({})'.format(self.name, data_str)
-
-
-class VectorPrinter(PrettyPrinter):
-    """Pretty-print Ada.Containers.Vectors.Vector values."""
-
-    name            = 'Vector'
-    generic         = 'ada.containers.vectors'
-    type_tag_suffix = 'vector'
-
-    def display_hint(self):
-        return 'array'
-
-    @property
-    def array_bounds(self):
-        elements = self.value['elements']
-        if not elements:
-            return (1, 0)
-        array_type = elements['ea'].type
-        first_index, _ = array_type.range()
-        last_index = int(self.value['elements']['last'])
-        return (first_index, last_index)
-
-    @property
-    def length(self):
-        first, last = self.array_bounds
-        if first <= last:
-            return last - first + 1
-        else:
-            return 0
-
-    @property
-    def array_elements(self):
-        first, last = self.array_bounds
-        if first <= last:
-            base_value = self.value['elements']['ea']
-            return base_value.cast(
-                base_value.type.target().array(first, last)
-            )
-        else:
-            return None
-
-    def children(self):
-        elements = self.array_elements
-        if elements:
-            first_index, last_index = elements.type.range()
-            for i in range(first_index, last_index + 1):
-                yield ('[{}]'.format(i), elements[i])
-
-    def to_string(self):
-        return '{} of length {}'.format(
-            str(self.value.type),
-            self.length,
-        )
+import gdb
 
 
 class GDBSubprinter(gdb.printing.SubPrettyPrinter):
-    def __init__(self, cls):
+    def __init__(self, cls, generics):
         self.cls = cls
+        self.generics = generics
         super(GDBSubprinter, self).__init__(cls.name)
 
     def matches(self, val):
@@ -104,7 +20,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
                 # whether `package_name` is an instantiation of
                 # Ada.Containers.Vectors. But we can't right now, so we rely on
                 # the user to tell us...
-                generic = generics_command.get_generic(package_name)
+                generic = self.generics.get_generic(package_name)
                 return (
                     generic is not None
                     and generic.lower() == self.cls.generic.lower()
@@ -119,11 +35,15 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
 
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
-    def __init__(self, name):
+    def __init__(self, name, generics):
         super(GDBPrettyPrinters, self).__init__(name, [])
+        self.generics = generics
 
     def append(self, pretty_printer_cls):
-        self.subprinters.append(GDBSubprinter(pretty_printer_cls))
+        self.subprinters.append(GDBSubprinter(
+            pretty_printer_cls,
+            self.generics
+        ))
 
     def __call__(self, val):
         for printer in self.subprinters:
@@ -209,18 +129,3 @@ Usage: generics [list]
             if len(argv) != 1:
                 return self.print_usage(from_tty, '"add" takes 1 arguments')
             self.do_remove(*argv)
-
-
-generics_command = GenericsCommand()
-
-
-global_printer = GDBPrettyPrinters('gnat-runtime')
-global_printer.append(UnboundedStringPrinter)
-global_printer.append(VectorPrinter)
-
-def register_printers(objfile):
-    objfile.pretty_printers.append(global_printer)
-
-
-for objfile in gdb.objfiles():
-    register_printers(objfile)
