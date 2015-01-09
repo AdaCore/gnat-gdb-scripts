@@ -1,7 +1,7 @@
 import gdb
 
 
-from gnat_runtime.maps import OrderedMapPrinter
+from gnat_runtime.maps import HashedMapPrinter, OrderedMapPrinter
 from gnat_runtime.printers import GDBPrettyPrinters, GenericsCommand
 from gnat_runtime.sets import OrderedSetPrinter
 from gnat_runtime.unbounded_strings import UnboundedStringPrinter
@@ -23,6 +23,7 @@ def setup():
     generics_command = GenericsCommand()
     printers = GDBPrettyPrinters('gnat-runtime', generics_command)
 
+    printers.append(HashedMapPrinter)
     printers.append(OrderedMapPrinter)
     printers.append(OrderedSetPrinter)
     printers.append(UnboundedStringPrinter)
