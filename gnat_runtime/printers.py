@@ -47,7 +47,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
 
     def __call__(self, val):
         for printer in self.subprinters:
-            if printer.matches(val):
+            if printer.enabled and printer.matches(val):
                 return printer.instantiate(val)
         return None
 
