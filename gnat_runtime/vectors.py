@@ -18,7 +18,7 @@ class VectorPrinter(PrettyPrinter):
             return (1, 0)
         array_type = elements['ea'].type
         first_index, _ = array_type.range()
-        last_index = int(self.value['elements']['last'])
+        last_index = int(self.value['last'])
         return (first_index, last_index)
 
     @property
