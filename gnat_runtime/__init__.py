@@ -1,8 +1,9 @@
 import gdb
 
 
+from gnat_runtime.generics import GenericsCommand
 from gnat_runtime.maps import HashedMapPrinter, OrderedMapPrinter
-from gnat_runtime.printers import GDBPrettyPrinters, GenericsCommand
+from gnat_runtime.printers import GDBPrettyPrinters
 from gnat_runtime.sets import HashedSetPrinter, OrderedSetPrinter
 from gnat_runtime.unbounded_strings import UnboundedStringPrinter
 from gnat_runtime.vectors import VectorPrinter
