@@ -49,5 +49,5 @@ def setup():
 
     # TODO: properly integrate with GDB's auto-load facility instead of
     # "brutaly" registersing our printers everywhere.
-    for objfile in gdb.objfiles():
-        objfile.pretty_printers.append(printers)
+    for progspace in gdb.progspaces():
+        progspace.pretty_printers.append(printers)
