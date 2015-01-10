@@ -46,6 +46,28 @@ class OrderedSetPrinter(BaseSetPrinter):
         return dfs(self.value['tree'])
 
 
+class OrderedSetCursorPrinter(PrettyPrinter):
+    """Pretty-print Ada.Containers.Ordered_Sets.Cursor values."""
+
+    name            = 'Ordered_Set_Cursor'
+
+    generic         = 'ada.containers.ordered_sets'
+    type_tag_suffix = 'cursor'
+
+    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+        Match.Field('container',
+            Match.Pointer(OrderedSetPrinter.type_pattern)),
+        Match.Field('node', Match.Pointer()),
+    ))
+
+    def to_string(self):
+        if self.value['container']:
+            assoc = self.value['node']['element']
+        else:
+            assoc = 'No_Element'
+        return 'Cursor ({})'.format(assoc)
+
+
 class HashedSetPrinter(BaseSetPrinter):
     """Pretty-print Ada.Containers.Hashed_Sets.Set values."""
 
@@ -67,3 +89,25 @@ class HashedSetPrinter(BaseSetPrinter):
 
     def get_node_iterator(self):
         return iterate(self.value['ht'])
+
+
+class HashedSetCursorPrinter(PrettyPrinter):
+    """Pretty-print Ada.Containers.Hashed_Sets.Cursor values."""
+
+    name            = 'Ordered_Set_Cursor'
+
+    generic         = 'ada.containers.hashed_sets'
+    type_tag_suffix = 'cursor'
+
+    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+        Match.Field('container',
+            Match.Pointer(HashedSetPrinter.type_pattern)),
+        Match.Field('node', Match.Pointer()),
+    ))
+
+    def to_string(self):
+        if self.value['container']:
+            assoc = self.value['node']['element']
+        else:
+            assoc = 'No_Element'
+        return 'Cursor ({})'.format(assoc)

@@ -67,3 +67,27 @@ class VectorPrinter(PrettyPrinter):
             str(self.value.type),
             self.length,
         )
+
+
+class VectorCursorPrinter(PrettyPrinter):
+    """Pretty-print Ada.Containers.Vectors.Cursor values."""
+
+    name            = 'Vector_Cursor'
+
+    generic         = 'ada.containers.vectors'
+    type_tag_suffix = 'cursor'
+
+    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+        Match.Field('container',
+            Match.Pointer(VectorPrinter.type_pattern)),
+        Match.Field('index', Match.Integer()),
+    ))
+
+    def to_string(self):
+        if self.value['container']:
+            vector = VectorPrinter(self.value['container'])
+            index = self.value['index']
+            assoc = '{} => {}'.format(index, vector.array_elements[index])
+        else:
+            assoc = 'No_Element'
+        return 'Cursor ({})'.format(assoc)

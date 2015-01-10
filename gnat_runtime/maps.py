@@ -55,6 +55,31 @@ class OrderedMapPrinter(BaseMapPrinter):
         return dfs(self.value['tree'])
 
 
+class OrderedMapCursorPrinter(PrettyPrinter):
+    """Pretty-print Ada.Containers.Ordered_Maps.Cursor values."""
+
+    name            = 'Ordered_Map_Cursor'
+
+    generic         = 'ada.containers.ordered_maps'
+    type_tag_suffix = 'cursor'
+
+    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+        Match.Field('container',
+            Match.Pointer(OrderedMapPrinter.type_pattern)),
+        Match.Field('node', Match.Pointer()),
+    ))
+
+    def to_string(self):
+        if self.value['container']:
+            assoc = '{} => {}'.format(
+                self.value['node']['key'],
+                self.value['node']['element'],
+            )
+        else:
+            assoc = 'No_Element'
+        return 'Cursor ({})'.format(assoc)
+
+
 class HashedMapPrinter(BaseMapPrinter):
     """Pretty-print Ada.Containers.Hashed_Maps.Map values."""
 
@@ -77,3 +102,28 @@ class HashedMapPrinter(BaseMapPrinter):
 
     def get_node_iterator(self):
         return iterate(self.value['ht'])
+
+
+class HashedMapCursorPrinter(PrettyPrinter):
+    """Pretty-print Ada.Containers.Hashed_Maps.Cursor values."""
+
+    name            = 'Ordered_Map_Cursor'
+
+    generic         = 'ada.containers.hashed_maps'
+    type_tag_suffix = 'cursor'
+
+    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+        Match.Field('container',
+            Match.Pointer(HashedMapPrinter.type_pattern)),
+        Match.Field('node', Match.Pointer()),
+    ))
+
+    def to_string(self):
+        if self.value['container']:
+            assoc = '{} => {}'.format(
+                self.value['node']['key'],
+                self.value['node']['element'],
+            )
+        else:
+            assoc = 'No_Element'
+        return 'Cursor ({})'.format(assoc)
