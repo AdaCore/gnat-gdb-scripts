@@ -34,6 +34,14 @@ class Match:
 
         def match(self, value_type):
             type_name = value_type.name
+            # TODO: GNAT can add a suffix for body-nested package entities.
+            # This is completely irrelevant for our pattern matcher, so strip
+            # these suffixes.
+            if type_name:
+                for body_pkg_suffix in ('X', 'Xb', 'Xn'):
+                    if type_name.endswith(body_pkg_suffix):
+                        type_name = type_name[:-len(body_pkg_suffix)]
+                        break
             if self.name:
                 if not (type_name and type_name == self.name):
                     return False
