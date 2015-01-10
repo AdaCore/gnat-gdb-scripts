@@ -2,6 +2,9 @@ import gdb
 
 
 from gnat_runtime.generics import GenericsCommand
+from gnat_runtime.lists import (
+    DoublyLinkedListPrinter, DoublyLinkedListCursorPrinter,
+)
 from gnat_runtime.maps import (
     HashedMapPrinter, HashedMapCursorPrinter,
     OrderedMapPrinter, OrderedMapCursorPrinter,
@@ -29,6 +32,9 @@ def setup():
 
     generics_command = GenericsCommand()
     printers = GDBPrettyPrinters('gnat-runtime', generics_command)
+
+    printers.append(DoublyLinkedListPrinter)
+    printers.append(DoublyLinkedListCursorPrinter)
 
     printers.append(HashedMapPrinter)
     printers.append(HashedMapCursorPrinter)
