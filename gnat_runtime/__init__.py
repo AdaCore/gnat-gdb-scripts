@@ -51,9 +51,17 @@ def setup():
 
     printers.append(UnboundedStringPrinter)
 
+    gdb.events.new_objfile.connect(handle_new_objfile)
+
     setup_done = True
 
-    # TODO: properly integrate with GDB's auto-load facility instead of
-    # "brutaly" registersing our printers everywhere.
-    for progspace in gdb.progspaces():
-        progspace.pretty_printers.append(printers)
+
+def handle_new_objfile(event):
+    objfile = event.new_objfile
+
+    # Registers our printers only for objfiles that are Ada main entry points.
+    adainit = gdb.lookup_global_symbol('adainit')
+    if adainit is None or adainit.symtab.objfile != objfile:
+        return
+
+    objfile.pretty_printers.append(printers)
