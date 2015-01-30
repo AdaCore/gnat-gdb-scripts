@@ -28,6 +28,9 @@ class DoublyLinkedListPrinter(PrettyPrinter):
         Match.Field('lock',   Match.Integer()),
     ))
 
+    def display_hint(self):
+        return 'array'
+
     @property
     def length(self):
         return self.value['length']
@@ -61,6 +64,9 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
             Match.Pointer(DoublyLinkedListPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
+
+    def display_hint(self):
+        return 'array'
 
     def to_string(self):
         if self.value['container']:
