@@ -120,10 +120,24 @@ class Match:
                 return False
 
             if self.fields:
-                if len(self.fields) != len(value_type.fields()):
+                # The compiler can introduce artificial fields into this
+                # structure. We do not want to consider them for matchers.
+                # Luckily, these fields should be the only ones having
+                # upper-case characters in their name.
+                value_fields = [
+                    field
+                    for field in value_type.fields()
+                    if field.name.lower() == field.name
+                ]
+                # ... But we might want to match structures that are
+                # artificial. In such cases, all fields are artificial.
+                if not value_fields:
+                    value_fields = value_type.fields()
+
+                if len(self.fields) != len(value_fields):
                     return False
                 for field_pattern, value_field in zip(
-                    self.fields, value_type.fields()
+                    self.fields, value_fields
                 ):
                     if not field_pattern.match(value_field):
                         return False
