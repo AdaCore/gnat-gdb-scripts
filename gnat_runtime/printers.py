@@ -1,5 +1,7 @@
 import gdb
 
+from gnat_runtime.utils import strip_type_name_suffix
+
 
 class GDBSubprinter(gdb.printing.SubPrettyPrinter):
     def __init__(self, cls, generics):
@@ -9,9 +11,17 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
 
     def matches(self, val):
         # If possible, try to match the name of `val`'s type.
-        type_tag = val.type.tag
-        if hasattr(self.cls, 'type_tag') and type_tag is not None:
-            if hasattr(self.cls, 'generic'):
+        type_tag = strip_type_name_suffix(val.type.tag)
+        if type_tag is not None:
+            # This is for non-generic cases.
+            if getattr(self.cls, 'type_tag', None):
+                return type_tag == self.cls.type_tag
+
+            # This is for types coming from generics instantiation.
+            elif (
+                getattr(self.cls, 'generic', None)
+                and getattr(self.cls, 'type_tag_suffix', None)
+            ):
                 suffix = '__' + self.cls.type_tag_suffix
                 if type_tag.endswith(suffix):
                     package_name = type_tag[:-len(suffix)]
@@ -20,12 +30,11 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
                     # Ada.Containers.Vectors. But we can't right now, so we
                     # rely on the user to tell us...
                     generic = self.generics.get_generic(package_name)
-                    return (
+                    if (
                         generic is not None
                         and generic.lower() == self.cls.generic.lower()
-                    )
-            else:
-                return type_tag == self.cls.type_tag
+                    ):
+                        return True
 
         # Otherwise, try to pattern match.
         if hasattr(self.cls, 'type_pattern'):
