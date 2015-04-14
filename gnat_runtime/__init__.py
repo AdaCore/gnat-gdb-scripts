@@ -51,14 +51,18 @@ def setup():
 
     printers.append(UnboundedStringPrinter)
 
-    gdb.events.new_objfile.connect(handle_new_objfile)
+    # Give a chance to register our pretty-printers for all objfiles already
+    # loaded...
+    for objfile in gdb.objfiles():
+        handle_new_objfile(objfile)
+    # ... and for all objfiles to come!
+    gdb.events.new_objfile.connect(
+        lambda event: handle_new_objfile(event.new_objfile))
 
     setup_done = True
 
 
-def handle_new_objfile(event):
-    objfile = event.new_objfile
-
+def handle_new_objfile(objfile):
     # Registers our printers only for objfiles that are Ada main entry points.
     adainit = gdb.lookup_global_symbol('adainit')
     if adainit is None or adainit.symtab.objfile != objfile:
