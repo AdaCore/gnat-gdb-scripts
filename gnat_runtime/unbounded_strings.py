@@ -1,3 +1,5 @@
+import gdb
+
 from gnat_runtime.utils import PrettyPrinter
 
 
@@ -8,6 +10,14 @@ class UnboundedStringPrinter(PrettyPrinter):
     type_tag = 'ada__strings__unbounded__unbounded_string'
 
     def to_string(self):
+        try:
+            data_str = self.get_string_value()
+        except gdb.MemoryError:
+            data_str = '[Invalid]'
+
+        return '{} ({})'.format(self.name, data_str)
+
+    def get_string_value(self):
         # Currently, it seems that the type associated to variable-length
         # arrays in discriminated records have incorrect bounds when accessing
         # the corresponding fields from a value.  This is why we compute
@@ -24,6 +34,4 @@ class UnboundedStringPrinter(PrettyPrinter):
 
         nested_type = data.type.target()
         array_type = nested_type.array(lower_bound, upper_bound)
-        data_str = str(data.cast(array_type))
-
-        return '{} ({})'.format(self.name, data_str)
+        return str(data.cast(array_type))
