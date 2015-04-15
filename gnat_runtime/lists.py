@@ -1,5 +1,7 @@
 import itertools
 
+import gdb
+
 from gnat_runtime.generics import Match
 from gnat_runtime.utils import PrettyPrinter
 
@@ -39,6 +41,8 @@ class DoublyLinkedListPrinter(PrettyPrinter):
         if self.value['first']:
             node = self.value['first']
             for i in itertools.count(0):
+                if i >= self.length:
+                    raise gdb.MemoryError('The linked list seems invalid')
                 yield ('[{}]'.format(i), node['element'])
                 if node == self.value['last']:
                     break
@@ -70,7 +74,10 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
 
     def to_string(self):
         if self.value['container']:
-            assoc = '{}'.format(self.value['node']['element'])
+            try:
+                assoc = '{}'.format(self.value['node']['element'])
+            except gdb.MemoryError:
+                return 'Cursor ([Invalid])'
         else:
             assoc = 'No_Element'
         return 'Cursor ({})'.format(assoc)
