@@ -1,3 +1,5 @@
+import gdb
+
 from gnat_runtime.generics import Match
 from gnat_runtime.utils import PrettyPrinter
 
@@ -55,18 +57,36 @@ class VectorPrinter(PrettyPrinter):
         else:
             return None
 
+    def element(self, index):
+        first, last = self.array_bounds
+        if first > last:
+            raise gdb.MemoryError('Tried to access an element in empty vector')
+        elif first <= index and index <= last:
+            return self.array_elements[index]
+        else:
+            raise gdb.MemoryError(
+                'Out of bound vector access ({} not in {} ..  {})'.format(
+                    index, first, last
+                )
+            )
+
     def children(self):
         elements = self.array_elements
         if elements:
             first_index, last_index = elements.type.range()
             for i in range(first_index, last_index + 1):
-                yield ('[{}]'.format(i), elements[i])
+                elt = elements[i]
+                elt.fetch_lazy()
+                yield ('[{}]'.format(i), elt)
 
     def to_string(self):
-        return '{} of length {}'.format(
-            str(self.value.type),
-            self.length,
-        )
+        try:
+            length = str(self.length)
+        except gdb.MemoryError:
+            status = '[invalid]'
+        else:
+            status = 'of length {}'.format(length)
+        return '{} {}'.format(str(self.value.type), status)
 
 
 class VectorCursorPrinter(PrettyPrinter):
@@ -85,9 +105,16 @@ class VectorCursorPrinter(PrettyPrinter):
 
     def to_string(self):
         if self.value['container']:
-            vector = VectorPrinter(self.value['container'])
+            try:
+                vector = VectorPrinter(self.value['container'])
+            except gdb.MemoryError:
+                return 'Cursor ([Invalid])'
             index = self.value['index']
-            assoc = '{} => {}'.format(index, vector.array_elements[index])
+            try:
+                element = str(vector.element(index))
+            except gdb.MemoryError:
+                return 'Cursor ([Invalid])'
+            assoc = '{} => {}'.format(index, element)
         else:
             assoc = 'No_Element'
         return 'Cursor ({})'.format(assoc)
