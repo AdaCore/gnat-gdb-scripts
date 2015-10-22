@@ -21,8 +21,7 @@ class VectorPrinter(PrettyPrinter):
             )
         )),
         Match.Field('last', Match.Integer()),
-        Match.Field('busy', Match.Integer()),
-        Match.Field('lock', Match.Integer()),
+        Match.Field('tc'),
     ))
 
     def display_hint(self):

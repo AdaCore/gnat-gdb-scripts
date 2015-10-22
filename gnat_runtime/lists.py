@@ -26,8 +26,7 @@ class DoublyLinkedListPrinter(PrettyPrinter):
         Match.Field('first',  Match.Pointer(node_pattern)),
         Match.Field('last',   Match.Pointer(node_pattern)),
         Match.Field('length', Match.Integer()),
-        Match.Field('busy',   Match.Integer()),
-        Match.Field('lock',   Match.Integer()),
+        Match.Field('tc'),
     ))
 
     def display_hint(self):

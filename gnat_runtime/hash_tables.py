@@ -13,8 +13,7 @@ def get_htable_pattern(node_pattern):
             Match.Field('P_BOUNDS', Match.Pointer()),
         ))),
         Match.Field('length', Match.Integer()),
-        Match.Field('busy',   Match.Integer()),
-        Match.Field('lock',   Match.Integer()),
+        Match.Field('tc'),
     )
 
 

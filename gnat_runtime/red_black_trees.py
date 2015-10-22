@@ -9,8 +9,7 @@ def get_rbtree_pattern(node_pattern):
         Match.Field('last',   node_access_pattern),
         Match.Field('root',   node_access_pattern),
         Match.Field('length', Match.Integer()),
-        Match.Field('busy',   Match.Integer()),
-        Match.Field('lock',   Match.Integer()),
+        Match.Field('tc'),
     )
 
 
