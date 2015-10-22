@@ -33,23 +33,26 @@ def setup():
     generics_command = GenericsCommand()
     printers = GDBPrettyPrinters('gnat-runtime', generics_command)
 
-    printers.append(DoublyLinkedListPrinter)
-    printers.append(DoublyLinkedListCursorPrinter)
+    for printer in [
+        DoublyLinkedListPrinter,
+        DoublyLinkedListCursorPrinter,
 
-    printers.append(HashedMapPrinter)
-    printers.append(HashedMapCursorPrinter)
-    printers.append(HashedSetPrinter)
-    printers.append(HashedSetCursorPrinter)
+        HashedMapPrinter,
+        HashedMapCursorPrinter,
+        HashedSetPrinter,
+        HashedSetCursorPrinter,
 
-    printers.append(OrderedMapPrinter)
-    printers.append(OrderedMapCursorPrinter)
-    printers.append(OrderedSetPrinter)
-    printers.append(OrderedSetCursorPrinter)
+        OrderedMapPrinter,
+        OrderedMapCursorPrinter,
+        OrderedSetPrinter,
+        OrderedSetCursorPrinter,
 
-    printers.append(VectorPrinter)
-    printers.append(VectorCursorPrinter)
+        VectorPrinter,
+        VectorCursorPrinter,
 
-    printers.append(UnboundedStringPrinter)
+        UnboundedStringPrinter,
+    ]:
+        printers.append(printer)
 
     # Give a chance to register our pretty-printers for all objfiles already
     # loaded...
