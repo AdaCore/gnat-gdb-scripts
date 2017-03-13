@@ -14,7 +14,7 @@ from gnatdbg.sets import (
     HashedSetPrinter, HashedSetCursorPrinter,
     OrderedSetPrinter, OrderedSetCursorPrinter,
 )
-from gnatdbg.unbounded_strings import UnboundedStringPrinter
+from gnatdbg.strings import UnboundedStringPrinter
 from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
 
 
