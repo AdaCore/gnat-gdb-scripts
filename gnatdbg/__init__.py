@@ -14,7 +14,7 @@ from gnatdbg.sets import (
     HashedSetPrinter, HashedSetCursorPrinter,
     OrderedSetPrinter, OrderedSetCursorPrinter,
 )
-from gnatdbg.strings import UnboundedStringPrinter
+from gnatdbg.strings import StringAccessPrinter, UnboundedStringPrinter
 from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
 
 
@@ -51,6 +51,7 @@ def setup():
         VectorCursorPrinter,
 
         UnboundedStringPrinter,
+        StringAccessPrinter,
     ]:
         printers.append(printer)
 
