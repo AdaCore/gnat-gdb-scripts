@@ -159,6 +159,11 @@ class Match:
                 return False
             return True
 
+    class Char(BasePattern):
+        """Mathes all character types."""
+        def match(self, typ):
+            return typ.code == gdb.TYPE_CODE_CHAR
+
 
 class GenericsCommand(gdb.Command):
     """Manages manual detection for Ada generic instantiations.
