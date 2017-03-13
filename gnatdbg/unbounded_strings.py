@@ -1,6 +1,6 @@
 import gdb
 
-from gnat_runtime.utils import PrettyPrinter
+from gnatdbg.utils import PrettyPrinter
 
 
 class UnboundedStringPrinter(PrettyPrinter):

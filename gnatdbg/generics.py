@@ -1,6 +1,6 @@
 import gdb
 
-from gnat_runtime.utils import strip_type_name_suffix
+from gnatdbg.utils import strip_type_name_suffix
 
 
 class Match:

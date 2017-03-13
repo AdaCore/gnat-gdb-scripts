@@ -1,4 +1,4 @@
-from gnat_runtime.generics import Match
+from gnatdbg.generics import Match
 
 
 def get_rbtree_pattern(node_pattern):

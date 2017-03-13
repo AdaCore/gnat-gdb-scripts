@@ -1,9 +1,9 @@
 from itertools import count
 
-from gnat_runtime.generics import Match
-from gnat_runtime.hash_tables import iterate, get_htable_pattern
-from gnat_runtime.red_black_trees import dfs, get_rbtree_pattern
-from gnat_runtime.utils import PrettyPrinter
+from gnatdbg.generics import Match
+from gnatdbg.hash_tables import iterate, get_htable_pattern
+from gnatdbg.red_black_trees import dfs, get_rbtree_pattern
+from gnatdbg.utils import PrettyPrinter
 
 
 class BaseMapPrinter(PrettyPrinter):

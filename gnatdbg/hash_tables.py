@@ -1,5 +1,5 @@
-from gnat_runtime.generics import Match
-from gnat_runtime.utils import iter_array
+from gnatdbg.generics import Match
+from gnatdbg.utils import iter_array
 
 
 def get_htable_pattern(node_pattern):

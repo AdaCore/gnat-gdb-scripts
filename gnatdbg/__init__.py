@@ -1,21 +1,21 @@
 import gdb
 
 
-from gnat_runtime.generics import GenericsCommand
-from gnat_runtime.lists import (
+from gnatdbg.generics import GenericsCommand
+from gnatdbg.lists import (
     DoublyLinkedListPrinter, DoublyLinkedListCursorPrinter,
 )
-from gnat_runtime.maps import (
+from gnatdbg.maps import (
     HashedMapPrinter, HashedMapCursorPrinter,
     OrderedMapPrinter, OrderedMapCursorPrinter,
 )
-from gnat_runtime.printers import GDBPrettyPrinters
-from gnat_runtime.sets import (
+from gnatdbg.printers import GDBPrettyPrinters
+from gnatdbg.sets import (
     HashedSetPrinter, HashedSetCursorPrinter,
     OrderedSetPrinter, OrderedSetCursorPrinter,
 )
-from gnat_runtime.unbounded_strings import UnboundedStringPrinter
-from gnat_runtime.vectors import VectorPrinter, VectorCursorPrinter
+from gnatdbg.unbounded_strings import UnboundedStringPrinter
+from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
 
 
 setup_done = False

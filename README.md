@@ -1,5 +1,5 @@
-GDB Pretty-Printers
-===================
+GDB scripts for Ada programs built with GNAT
+============================================
 
 This repository gathers various GDB Python helpers related to the GNAT runtime.
 They are intended to make debugging Ada programs easier. These helpers are
@@ -11,7 +11,7 @@ API! See the "Examples" section below for a few showcases.
 Install
 =======
 
-These GDB helpers are organized into a `gnat_runtime` Python package, so in
+These GDB helpers are organized into a `gnatdbg` Python package, so in
 order to use them one has to install the package somewhere Python can find it.
 Note that you will need GDB 7.8 or higher.
 
@@ -19,16 +19,16 @@ GNAT Pro package's GDB is bundled with a standalone Python installation, so
 the easiest way to get this work is probably the following (which also works
 with non-GNAT Pro GDB setups):
 
-  - Put the `gnat_runtime` directory into a specific place `$DIR` and don't
-    move it afterwards.
+  - Put the `gnatdbg` directory into a specific place `$DIR` and don't move it
+    afterwards.
   - Open your GDB configuration file (`$HOME/.gdbinit`)
   - Add the following commands:
 
         python import sys; sys.path.append("$DIR")
-        python import gnat_runtime; gnat_runtime.setup()
+        python import gnatdbg; gnatdbg.setup()
 
     ... and make sure you replaced `$DIR` in the above commands with the
-    directory where you moved `gnat_runtime`.
+    directory where you moved `gnatdbg`.
 
   - Congratulations, you are done!
 

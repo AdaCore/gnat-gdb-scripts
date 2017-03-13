@@ -1,7 +1,7 @@
 import gdb
 
-from gnat_runtime.generics import Match
-from gnat_runtime.utils import PrettyPrinter
+from gnatdbg.generics import Match
+from gnatdbg.utils import PrettyPrinter
 
 
 class VectorPrinter(PrettyPrinter):
