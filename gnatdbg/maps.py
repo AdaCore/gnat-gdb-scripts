@@ -38,9 +38,9 @@ class OrderedMapPrinter(BaseMapPrinter):
     type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('tree', get_rbtree_pattern(Match.Struct(
-            Match.Field('parent', Match.Typedef(Match.Pointer())),
-            Match.Field('left',   Match.Typedef(Match.Pointer())),
-            Match.Field('right',  Match.Typedef(Match.Pointer())),
+            Match.Field('parent', Match.Pointer()),
+            Match.Field('left',   Match.Pointer()),
+            Match.Field('right',  Match.Pointer()),
             Match.Field('color',  Match.Enum()),
             Match.Field('key'),
             Match.Field('element'),

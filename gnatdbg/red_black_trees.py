@@ -2,7 +2,7 @@ from gnatdbg.generics import Match
 
 
 def get_rbtree_pattern(node_pattern):
-    node_access_pattern = Match.Typedef(Match.Pointer(node_pattern))
+    node_access_pattern = Match.Pointer(node_pattern)
     return Match.Struct(
         Match.Field('_tag'),
         Match.Field('first',  node_access_pattern),
