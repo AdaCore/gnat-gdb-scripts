@@ -1,8 +1,17 @@
+"""
+Helpers to work with GNAT's implementation of hash table-based standard
+containers.
+"""
+
 from gnatdbg.generics import Match
 from gnatdbg.utils import coerce_array, iter_array
 
 
 def get_htable_pattern(node_pattern):
+    """
+    Return the type pattern for hash tables used in GNAT's implementation of
+    standard containers for nodes that match the given `node_pattern`.
+    """
     # TODO: unfortunately, due to the current state of DWARF/GDB, it is not
     # possible to reach `node_pattern` through hash table's value type.
     return Match.Struct(

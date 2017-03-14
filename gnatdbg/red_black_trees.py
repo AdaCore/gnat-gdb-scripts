@@ -1,7 +1,16 @@
+"""
+Helpers to work with GNAT's implementation of red-black tree-based standard
+containers.
+"""
+
 from gnatdbg.generics import Match
 
 
 def get_rbtree_pattern(node_pattern):
+    """
+    Return the type pattern for red-black trees used in GNAT's implementation
+    of standard containers for nodes that match the given `node_pattern`.
+    """
     node_access_pattern = Match.Pointer(node_pattern)
     return Match.Struct(
         Match.Field('_tag'),
