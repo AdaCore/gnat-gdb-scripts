@@ -1,3 +1,5 @@
+import itertools
+
 import gdb
 
 
@@ -26,7 +28,6 @@ class PrintGDBTypeTreeCommand(gdb.Command):
         self.print_type(value_type)
 
     def print_type(self, value_type):
-        import itertools
         counter = iter(itertools.count(0))
         visited = {}
 
