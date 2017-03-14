@@ -13,11 +13,8 @@ Install
 
 These GDB helpers are organized into a `gnatdbg` Python package, so in
 order to use them one has to install the package somewhere Python can find it.
-Note that you will need GDB 7.8 or higher.
-
-GNAT Pro package's GDB is bundled with a standalone Python installation, so
-the easiest way to get this work is probably the following (which also works
-with non-GNAT Pro GDB setups):
+Note that you will need GDB 7.8 or higher. The easiest way to get this working
+is probably the following:
 
   - Put the `gnatdbg` directory into a specific place `$DIR` and don't move it
     afterwards.
