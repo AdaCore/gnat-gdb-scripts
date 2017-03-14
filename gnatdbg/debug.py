@@ -8,7 +8,7 @@ class PrintGDBTypeTreeCommand(gdb.Command):
     Prints a GDB type as a tree.
 
     This command is intended to help pretty-printers development. It prints the
-    GDB view of user types (the gdb.Type API).
+    GDB view of user types, i.e. trees of gdb.Type instances.
     """
 
     def __init__(self):
