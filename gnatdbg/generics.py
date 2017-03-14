@@ -159,7 +159,7 @@ class Match(object):
 
         def _match(self, typ, mt):
             # TODO: types are wrapped in typedefs in a too inconsistent way.
-            # For instance, say B is a pointed that is stored inside a
+            # For instance, say B is a pointer that is stored inside a
             # structure A; then when B has been known to be a TYPE_CODE_PTR
             # when accessed from a variable of type A while it is a
             # TYPE_CODE_TYPEDEF around a TYPE_CODE_PTR when accessed from a
