@@ -41,7 +41,8 @@ def coerce_array(array_value):
 
     As long as we do not have DWARF/GDB proper support for unconstrained array,
     we have to deal with fat pointers manually. If `array_type` is such a fat
-    pointer, create an array value with the appropriate bound info.
+    pointer, create an array value with the appropriate bound info. If it is
+    actually a null fat pointer, just return None for convenience.
 
     If `array_value` is already a ready-to-use array value, just return it.
 
@@ -55,15 +56,16 @@ def coerce_array(array_value):
             'P_ARRAY', 'P_BOUNDS'
         }
     ):
-        # Get the bounds
         template = array_value['P_BOUNDS']
+        array_ptr = array_value['P_ARRAY']
+        if not (template and array_ptr):
+            return None
+
+        # Get the bounds
         first_index = int(template['LB0'])
         last_index = int(template['UB0'])
         if last_index < first_index:
             last_index = first_index - 1
-
-        # Then get and cast the array to the proper type
-        array_ptr = array_value['P_ARRAY']
 
         # Peel the pointer and array type layers
         array_ptr_type = array_ptr.type
