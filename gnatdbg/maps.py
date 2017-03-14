@@ -92,7 +92,7 @@ class HashedMapPrinter(BaseMapPrinter):
         Match.Field('ht', get_htable_pattern(Match.Struct(
             Match.Field('key'),
             Match.Field('element'),
-            Match.Field('next', Match.Typedef(Match.Pointer())),
+            Match.Field('next', Match.Pointer()),
         ))),
     ))
 
