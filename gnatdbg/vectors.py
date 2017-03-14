@@ -98,7 +98,7 @@ class VectorCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(VectorPrinter.type_pattern)),
+                    Match.Pointer(VectorPrinter.type_pattern)),
         Match.Field('index', Match.Integer()),
     ))
 

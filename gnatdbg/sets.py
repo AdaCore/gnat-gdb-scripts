@@ -56,7 +56,7 @@ class OrderedSetCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(OrderedSetPrinter.type_pattern)),
+                    Match.Pointer(OrderedSetPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
 
@@ -101,7 +101,7 @@ class HashedSetCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(HashedSetPrinter.type_pattern)),
+                    Match.Pointer(HashedSetPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
 

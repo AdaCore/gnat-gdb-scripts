@@ -65,7 +65,7 @@ class OrderedMapCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(OrderedMapPrinter.type_pattern)),
+                    Match.Pointer(OrderedMapPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
 
@@ -114,7 +114,7 @@ class HashedMapCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(HashedMapPrinter.type_pattern)),
+                    Match.Pointer(HashedMapPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
 

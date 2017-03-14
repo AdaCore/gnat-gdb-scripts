@@ -235,11 +235,11 @@ class Match(object):
                     return False
 
                 type_first, type_last = typ.range()
-                if not mt.check_match(self.first is None or
-                                      self.first == type_first):
+                if not mt.check_match(self.first is None
+                                      or self.first == type_first):
                     return False
-                if not mt.check_match(self.last is None or
-                        self.last == type_last):
+                if not mt.check_match(self.last is None
+                                      or self.last == type_last):
                     return False
 
                 return True
@@ -297,8 +297,7 @@ class Match(object):
         def _match(self, field, mt):
             with mt.scope(self, field):
                 if (self.name is not None
-                    and self.name != field.name
-                ):
+                        and self.name != field.name):
                     return mt.tag_mismatch()
 
                 if self.type and not self.type._match(field.type, mt):

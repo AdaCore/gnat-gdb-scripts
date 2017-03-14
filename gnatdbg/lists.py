@@ -64,7 +64,7 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
         Match.Field('container',
-            Match.Pointer(DoublyLinkedListPrinter.type_pattern)),
+                    Match.Pointer(DoublyLinkedListPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
     ))
 

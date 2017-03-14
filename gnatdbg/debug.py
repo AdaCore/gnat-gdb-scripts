@@ -42,10 +42,11 @@ class PrintGDBTypeTreeCommand(gdb.Command):
             else:
                 return '%{} ({})'.format(no, t.name)
 
-            result = '%{} ({}) = {}'.format(no, t.name, self.code_names[t.code])
+            result = '%{} ({}) = {}'.format(no, t.name,
+                                            self.code_names[t.code])
             if t.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_TYPEDEF):
                 result += ':\n{}{}'.format(
-                    indent_str, helper(t.target(), indent+1)
+                    indent_str, helper(t.target(), indent + 1)
                 )
             elif t.code == gdb.TYPE_CODE_INT:
                 result += ' ({} bytes)'.format(t.sizeof)
@@ -53,14 +54,14 @@ class PrintGDBTypeTreeCommand(gdb.Command):
                 first, last = t.range()
                 result += '[{} .. {}]:\n{}{}'.format(
                     first, last,
-                    indent_str, helper(t.target(), indent+1)
+                    indent_str, helper(t.target(), indent + 1)
                 )
             elif t.code == gdb.TYPE_CODE_STRUCT:
                 result += ':'
                 for field in t.fields():
                     result += '\n{}{}: {}'.format(
                         indent_str, field.name,
-                        helper(field.type, indent+1)
+                        helper(field.type, indent + 1)
                     )
             return result
 
