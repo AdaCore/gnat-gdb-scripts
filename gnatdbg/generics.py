@@ -78,6 +78,15 @@ class Match(object):
     which type comes from which generic package intantiation. Nested classes
     provide helpers to match type patterns so that pretty-printers can decide
     wether they support some type just looking at what it looks like.
+
+    For instance, the following will match all structure types that have two
+    fields, the first one called "foo" of any time and the second one called
+    "bar" of some integer type::
+
+        Match.Struct(
+            Match.Field('foo'),
+            Match.Field('bar', Match.Integer()),
+        )
     """
 
     class BasePattern(object):
