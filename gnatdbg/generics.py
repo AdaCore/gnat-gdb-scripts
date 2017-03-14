@@ -347,11 +347,7 @@ Usage: generics [list]
     def print_usage(self, from_tty, error_msg=None):
         if error_msg:
             gdb.write('{}: {}\n'.format(self.NAME, error_msg))
-        gdb.write(
-'''Usage: {} [list]
-          {} add PREFIX GENERIC
-          {} remove PREFIX
-''')
+        gdb.write('Run "help {}" for more information\n'.format(self.NAME))
 
     def do_list(self):
         if self.instances:
