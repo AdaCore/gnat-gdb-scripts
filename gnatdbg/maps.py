@@ -2,8 +2,8 @@ from itertools import count
 
 from gnatdbg.generics import Match
 from gnatdbg.hash_tables import iterate, get_htable_pattern
+from gnatdbg.printers import PrettyPrinter
 from gnatdbg.red_black_trees import dfs, get_rbtree_pattern
-from gnatdbg.utils import PrettyPrinter
 
 
 class BaseMapPrinter(PrettyPrinter):

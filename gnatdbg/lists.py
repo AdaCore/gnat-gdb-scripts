@@ -3,7 +3,7 @@ import itertools
 import gdb
 
 from gnatdbg.generics import Match
-from gnatdbg.utils import PrettyPrinter
+from gnatdbg.printers import PrettyPrinter
 
 
 class DoublyLinkedListPrinter(PrettyPrinter):
