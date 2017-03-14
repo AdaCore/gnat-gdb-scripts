@@ -2,14 +2,7 @@ from contextlib import contextmanager
 
 import gdb
 
-from gnatdbg.utils import strip_type_name_suffix
-
-
-gdb_code_names = {
-    getattr(gdb, name): name
-    for name in dir(gdb)
-    if name.startswith('TYPE_CODE_')
-}
+from gnatdbg.utils import gdb_code_names, strip_type_name_suffix
 
 
 def type_short_descr(typ):

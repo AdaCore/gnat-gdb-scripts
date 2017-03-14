@@ -8,6 +8,13 @@ class PrettyPrinter(object):
         self.value = value
 
 
+gdb_code_names = {
+    getattr(gdb, name): name
+    for name in dir(gdb)
+    if name.startswith('TYPE_CODE_')
+}
+
+
 def strip_typedefs(value):
     return value.cast(value.type.strip_typedefs())
 
