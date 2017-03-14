@@ -58,7 +58,12 @@ def iter_array(array_value):
         array_ptr = array_value['P_ARRAY']
         # Peel the pointer, typedef and array layer to rebuild an array type
         # from the element type.
-        elt_type = array_ptr.type.target().target().target()
+        array_ptr_type = array_ptr.type
+        assert array_ptr_type.code == gdb.TYPE_CODE_PTR
+        raw_array_type = array_ptr_type.target()
+        assert raw_array_type.code == gdb.TYPE_CODE_ARRAY
+        elt_type = raw_array_type.target()
+
         array_type = elt_type.array(first_index, last_index)
         array_value = array_ptr.cast(array_type.pointer()).dereference()
 
