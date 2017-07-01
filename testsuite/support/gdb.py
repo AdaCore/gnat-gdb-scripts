@@ -16,7 +16,9 @@ class GDBSession(object):
     PROMPT_RE = r'\(gdb\) '
     TIMEOUT = 5  # In seconds
 
-    def __init__(self, program):
+    def __init__(self, program, log_file=None):
+        self.log_file = log_file or 'gdb.log'
+
         # TODO: handle non-native platforms
 
         # Disable the load of .gdbinit to avoid user configuration
@@ -27,6 +29,20 @@ class GDBSession(object):
 
         self.proc = ExpectProcess(argv, save_input=True, save_output=True)
         _ = self._read_to_next_prompt()
+
+        # If code coverage is enabled, start it before loading gnatdbg
+        datafile = os.environ.get('COVERAGE_DATAFILE')
+        self.coverage_enabled = datafile is not None
+        if self.coverage_enabled:
+            rcfile = os.environ['COVERAGE_RCFILE']
+            self.execute('python import coverage')
+            self.execute('''python
+_cov = coverage.Coverage(data_file={data_file!r}, config_file={config_file!r})
+_cov.start()
+end'''.format(
+                data_file=datafile,
+                config_file=rcfile
+            ))
 
         # Automatically load the pretty-printers
         self.execute('python import gnatdbg; gnatdbg.setup()')
@@ -128,7 +144,9 @@ class GDBSession(object):
         self.execute('run')
 
     def __del__(self):
+        if self.coverage_enabled:
+            self.execute('python _cov.stop(); _cov.save()')
         # No matter what, write the session logs to make post-mortem debugging
         # possible.
-        with open('gdb.log', 'w') as f:
+        with open(self.log_file, 'w') as f:
             f.write(self.proc.get_session_logs())

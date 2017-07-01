@@ -21,9 +21,13 @@ class PythonDriver(BaseDriver):
             os.path.join(self.testsuite_dir, '..')
         ] + self.env_path_split(os.environ.get('PYTHONPATH'))
 
-        if self.run_and_check(
-            [sys.executable, self.PY_FILE],
-            {'PYTHONPATH': self.env_path_format(py_path)},
-            error_on_output=True,
-        ):
+        env = {'PYTHONPATH': self.env_path_format(py_path)}
+        coverage_dir = self.global_env.get('coverage_dir')
+        if coverage_dir:
+            env['COVERAGE_DATAFILE'] = os.path.join(
+                coverage_dir, self.test_env['test_name'] + '.coverage'
+            )
+
+        if self.run_and_check([sys.executable, self.PY_FILE],
+                              env, error_on_output=True):
             self.result.set_status('PASSED')
