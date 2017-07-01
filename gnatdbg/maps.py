@@ -32,7 +32,6 @@ class OrderedMapPrinter(BaseMapPrinter):
     """Pretty-print Ada.Containers.Ordered_Maps.Map values."""
 
     name            = 'Ordered_Map'
-    generic         = 'ada.containers.ordered_maps'
     type_tag_suffix = 'map'
 
     type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
@@ -60,7 +59,6 @@ class OrderedMapCursorPrinter(PrettyPrinter):
 
     name            = 'Ordered_Map_Cursor'
 
-    generic         = 'ada.containers.ordered_maps'
     type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
@@ -84,7 +82,6 @@ class HashedMapPrinter(BaseMapPrinter):
     """Pretty-print Ada.Containers.Hashed_Maps.Map values."""
 
     name            = 'Hashed_Map'
-    generic         = 'ada.containers.hashed_maps'
     type_tag_suffix = 'map'
 
     type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
@@ -109,7 +106,6 @@ class HashedMapCursorPrinter(PrettyPrinter):
 
     name            = 'Ordered_Map_Cursor'
 
-    generic         = 'ada.containers.hashed_maps'
     type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(

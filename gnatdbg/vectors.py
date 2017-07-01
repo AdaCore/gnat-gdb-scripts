@@ -9,7 +9,6 @@ class VectorPrinter(PrettyPrinter):
 
     name            = 'Vector'
 
-    generic         = 'ada.containers.vectors'
     type_tag_suffix = 'vector'
 
     type_pattern    = Match.TypeName(suffix='__vector', pattern=Match.Struct(
@@ -93,7 +92,6 @@ class VectorCursorPrinter(PrettyPrinter):
 
     name            = 'Vector_Cursor'
 
-    generic         = 'ada.containers.vectors'
     type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(

@@ -24,7 +24,6 @@ class OrderedSetPrinter(BaseSetPrinter):
     """Pretty-print Ada.Containers.Ordered_Sets.Set values."""
 
     name            = 'Ordered_Set'
-    generic         = 'ada.containers.ordered_sets'
     type_tag_suffix = 'set'
 
     type_pattern    = Match.TypeName(suffix='__set', pattern=Match.Struct(
@@ -51,7 +50,6 @@ class OrderedSetCursorPrinter(PrettyPrinter):
 
     name            = 'Ordered_Set_Cursor'
 
-    generic         = 'ada.containers.ordered_sets'
     type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
@@ -72,7 +70,6 @@ class HashedSetPrinter(BaseSetPrinter):
     """Pretty-print Ada.Containers.Hashed_Sets.Set values."""
 
     name            = 'Hashed_Set'
-    generic         = 'ada.containers.hashed_sets'
     type_tag_suffix = 'set'
 
     type_pattern    = Match.TypeName(suffix='__set', pattern=Match.Struct(
@@ -96,7 +93,6 @@ class HashedSetCursorPrinter(PrettyPrinter):
 
     name            = 'Ordered_Set_Cursor'
 
-    generic         = 'ada.containers.hashed_sets'
     type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(

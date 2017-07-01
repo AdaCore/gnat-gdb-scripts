@@ -1,7 +1,6 @@
 import gdb
 
 
-from gnatdbg.generics import GenericsCommand
 from gnatdbg.lists import (
     DoublyLinkedListPrinter, DoublyLinkedListCursorPrinter,
 )
@@ -20,18 +19,15 @@ from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
 
 setup_done = False
 printers = None
-generics_command = None
 
 
 def setup():
     global setup_done
     global printers
-    global generics_command
     if setup_done:
         return
 
-    generics_command = GenericsCommand()
-    printers = GDBPrettyPrinters('gnat-runtime', generics_command)
+    printers = GDBPrettyPrinters('gnat-runtime')
 
     for printer in [
         DoublyLinkedListPrinter,
