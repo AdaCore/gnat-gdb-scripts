@@ -16,7 +16,7 @@ def print_type_tree(typeobj):
 
     def helper(t, indent=1):
         indent_str = '  ' * indent
-        key = str(t)
+        key = (t.code, str(t))
         try:
             no = visited[key]
         except KeyError:
