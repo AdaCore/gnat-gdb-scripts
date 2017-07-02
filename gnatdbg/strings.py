@@ -5,6 +5,33 @@ from gnatdbg.printers import PrettyPrinter
 from gnatdbg.utils import ada_string_repr
 
 
+def _fetch_string(array_access, length, encoding=None, errors=None):
+    """
+    Fetch the string value in `array_access`.
+
+    :param gdb.Value array_access: Value that is a pointer to the array that
+        represents the string.
+    :param int length: Length of the string to fetch.
+    :param str|None encoding: Encoding used to decode the string. Same meaning
+        as in str.decode().
+    :param str|None errors: Error handling for string decoding. Same meaning
+        as in str.decode().
+    :rtype: str
+    """
+    if length <= 0:
+        return ''
+
+    ptr_to_elt_type = array_access.type.target().target().pointer()
+    ptr_to_first = array_access.cast(ptr_to_elt_type)
+
+    kwargs = {'length': length}
+    if encoding:
+        kwargs['encoding'] = encoding
+    if errors:
+        kwargs['errors'] = errors
+    return ptr_to_first.string(**kwargs)
+
+
 class UnboundedString(object):
     """
     Helper class to inspect Ada.Strings.Unbounded.Unbounded_String values.
@@ -29,21 +56,8 @@ class UnboundedString(object):
 
         :rtype: str
         """
-        unb_str = self.value['reference']
-        if self.length <= 0:
-            return ''
-
-        data = unb_str['data']
-
-        ptr_to_elt_type = data.type.target().pointer()
-        ptr_to_first = data.address.cast(ptr_to_elt_type)
-
-        kwargs = {'length': self.length}
-        if encoding:
-            kwargs['encoding'] = encoding
-        if errors:
-            kwargs['errors'] = errors
-        return ptr_to_first.string(**kwargs)
+        return _fetch_string(self.value['reference']['data'].address,
+                             self.length, encoding, errors)
 
 
 class UnboundedStringPrinter(PrettyPrinter):
@@ -66,10 +80,11 @@ class UnboundedStringPrinter(PrettyPrinter):
         return '{} ({})'.format(self.name, str_repr)
 
 
-class StringAccessPrinter(PrettyPrinter):
-    """Pretty-print String access values."""
+class StringAccess(object):
+    """
+    Helper class to inspect String accesses.
+    """
 
-    name = 'access String'
     type_pattern = Match.Typedef(Match.Struct(
         Match.Field('P_ARRAY', Match.Pointer(Match.Array(
             element=Match.Char(),
@@ -77,29 +92,65 @@ class StringAccessPrinter(PrettyPrinter):
         Match.Field('P_BOUNDS'),
     ))
 
+    def __init__(self, value):
+        if not self.matches(value):
+            raise TypeError('Input is not an access to string')
+        self.value = value
+
+    @classmethod
+    def matches(cls, value):
+        """
+        Return whether `value` is a string access.
+
+        :param gdb.Value value: Value to test.
+        :rtype: bool
+        """
+        return cls.type_pattern.match(value.type)
+
+    @property
+    def bounds(self):
+        """
+        Return the bounds of the accessed string.
+
+        :rtype: (int, int)
+        """
+        struct = self.value['P_BOUNDS']
+        return (int(struct['LB0']), int(struct['UB0']))
+
+    @property
+    def length(self):
+        lb, ub = self.bounds
+        return 0 if lb > ub else (ub - lb + 1)
+
+    def get_string(self, encoding=None, errors=None):
+        """
+        Return the accessed string.
+
+        :rtype: str
+        """
+        return _fetch_string(self.value['P_ARRAY'], self.length, encoding,
+                             errors)
+
+
+class StringAccessPrinter(PrettyPrinter):
+    """Pretty-print String access values."""
+
+    name = 'access String'
+    type_pattern = StringAccess.type_pattern
+
     def to_string(self):
+        val = StringAccess(self.value)
         try:
-            data_str = self.get_string_value()
+            # Latin-1 will enable us to read random binary data as bytes: we
+            # will display non-printable ASCII bytes later.
+            data_str = val.get_string('latin-1')
         except gdb.MemoryError:
-            data_str = '[Invalid]'
+            str_repr = '[Invalid]'
+        else:
+            str_repr = ada_string_repr(data_str)
 
         return '({}) {} {}'.format(
             self.value.type.name,
             self.value['P_ARRAY'],
-            str(data_str)
+            str_repr
         )
-
-    def get_string_value(self):
-        data_ptr = self.value['P_ARRAY']
-        bounds = self.value['P_BOUNDS']
-
-        lower_bound = int(bounds['LB0'])
-        upper_bound = int(bounds['UB0'])
-        # GDB's Python API requires array length (U - L + 1) not to be
-        # negative.
-        if lower_bound > upper_bound:
-            upper_bound = lower_bound - 1
-
-        nested_type = data_ptr.type.target().target()
-        array_type = nested_type.array(lower_bound, upper_bound).pointer()
-        return str(data_ptr.cast(array_type).dereference())
