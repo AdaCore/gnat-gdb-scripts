@@ -16,7 +16,7 @@ class GDBSession(object):
     PROMPT_RE = r'\(gdb\) '
     TIMEOUT = 5  # In seconds
 
-    def __init__(self, program, log_file=None):
+    def __init__(self, program, log_file=None, load_gnatdbg=True):
         self.log_file = log_file or 'gdb.log'
 
         # TODO: handle non-native platforms
@@ -44,9 +44,6 @@ end'''.format(
                 config_file=rcfile
             ))
 
-        # Automatically load the pretty-printers
-        self.execute('python import gnatdbg; gnatdbg.setup()')
-
         # Enable Python backtraces to ease investigation
         self.execute('set python print-stack full')
 
@@ -54,6 +51,11 @@ end'''.format(
         # size.
         self.execute('set height 0')
         self.execute('set width 80')
+
+        if load_gnatdbg:
+            # Automatically load the pretty-printers. Make sure loading happens
+            # without error.
+            self.test('python import gnatdbg; gnatdbg.setup()', '')
 
     def _read_to_next_prompt(self):
         """

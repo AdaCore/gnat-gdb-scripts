@@ -56,7 +56,8 @@ class Testsuite(BaseTestsuite):
             # this, spawn GDB just like testcases.
             gdb = GDBSession(
                 'doesnotexist',
-                log_file=os.path.join(self.coverage_dir, 'gdb.log')
+                log_file=os.path.join(self.coverage_dir, 'gdb.log'),
+                load_gnatdbg=False
             )
 
             gdb.execute('python import glob, coverage')
