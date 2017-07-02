@@ -8,6 +8,16 @@ gdb_code_names = {
 }
 
 
+system_address = gdb.lookup_type('system__address')
+
+
+def ptr_to_int(ptr_value):
+    """
+    Convert an access GDB value into the corresponding Python integer.
+    """
+    return int(ptr_value.cast(system_address))
+
+
 def strip_typedefs(value):
     return value.cast(value.type.strip_typedefs())
 
@@ -101,3 +111,26 @@ def ada_string_repr(string):
         else:
             chars.append(c)
     return '"{}"'.format(''.join(chars))
+
+
+def encode_name(name):
+    """
+    Encode a qualified name into a GNAT encoded name.
+
+    For instance: Foo.Bar_Type -> foo__bar_type
+
+    :param str name: Name to encode:
+    :rtype: str
+    """
+    return name.lower().replace('.', '__')
+
+
+def addr_to_val(addr, valtype):
+    """
+    Create a value based on the given address and type.
+
+    :param gdb.Value addr: Address to use.
+    :param gdb.Type valtype: Type to use.
+    :rtype: gdb.Value
+    """
+    return addr.cast(valtype.pointer()).dereference()
