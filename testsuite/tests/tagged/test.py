@@ -18,16 +18,16 @@ gdb.test('python'
          ' ri = reinterpret_tagged(i);', '')
 
 gdb.test('python print("c: {} -> {} {}".format(c.type, rc.type, rc))',
-         'c: access foo.p.child_type'
-         ' -> foo.p.child_type (i => 1, j => 2, k => 3)')
+         'c: access p.child_type'
+         ' -> p.child_type (i => 1, j => 2, k => 3)')
 
 gdb.test('python print("r: {} -> {} {}".format(r.type, rr.type, rr))',
-         'r: access foo.p.root_type'
-         ' -> foo.p.child_type (i => 1, j => 2, k => 3)')
+         'r: access p.root_type'
+         ' -> p.child_type (i => 1, j => 2, k => 3)')
 
 gdb.test('python print("i: {} -> {} {}".format(i.type, ri.type, ri))',
-         'i: access foo.p.interface_type'
-         ' -> foo.p.child_type (i => 1, j => 2, k => 3)')
+         'i: access p.interface_type'
+         ' -> p.child_type (i => 1, j => 2, k => 3)')
 
 gdb.test('python tagged_field(gdb.parse_and_eval("n"), "foo")',
          '@...TypeError: Input type is not tagged@...')
