@@ -1,4 +1,3 @@
-import glob
 import os.path
 
 from gnatpython.testsuite import Testsuite as BaseTestsuite
