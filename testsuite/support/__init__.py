@@ -17,6 +17,10 @@ class Testsuite(BaseTestsuite):
             '--coverage', '-C', action='store_true',
             help='Compute gnatdbg code coverage'
         )
+        self.main.add_option(
+            '--no-auto-pythonpath', '-A', action='store_true',
+            help='Do not update PYTHONPATH to reach gnatdbg'
+        )
 
     @property
     def coverage_enabled(self):

@@ -16,10 +16,13 @@ class PythonDriver(BaseDriver):
         py_path = [
             # The testsuite's "support" package
             os.path.join(self.testsuite_dir),
+        ]
 
-            # gnatdbg itself
-            os.path.join(self.testsuite_dir, '..')
-        ] + self.env_path_split(os.environ.get('PYTHONPATH'))
+        # gnatdbg itself
+        if not self.global_env['options'].no_auto_pythonpath:
+            py_path.append(os.path.join(self.testsuite_dir, '..'))
+
+        py_path += self.env_path_split(os.environ.get('PYTHONPATH'))
 
         env = {'PYTHONPATH': self.env_path_format(py_path)}
         coverage_dir = self.global_env.get('coverage_dir')
