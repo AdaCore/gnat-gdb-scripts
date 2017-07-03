@@ -35,6 +35,11 @@ gdb.test('python tagged_field(gdb.parse_and_eval("n"), "foo")',
 gdb.test('python tagged_field(c, "foo")',
          '@...gdb.error: There is no member foo@...')
 
+# Test that FOR loops iteration variables, which are implemented as references,
+# are automatically dereferenced.
+gdb.test('python print(str(reinterpret_tagged(gdb.parse_and_eval("o"))))',
+         '(i => 1, j => 2, k => 3)')
+
 # Corrupt Child_Type's dispatch table, in particular the signature field and
 # try to reinterpret "c" once more.
 gdb.test('python'

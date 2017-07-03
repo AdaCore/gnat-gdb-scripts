@@ -99,8 +99,8 @@ def auto_deref_tagged(tagged_value):
     :rtype: gdb.Value
     """
     tagged_value = strip_typedefs(tagged_value)
-    if tagged_value.type.code == gdb.TYPE_CODE_PTR:
-        tagged_value = strip_typedefs(tagged_value.dereference())
+    while tagged_value.type.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_REF):
+        tagged_value = strip_typedefs(tagged_value.referenced_value())
     return tagged_value
 
 
