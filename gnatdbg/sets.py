@@ -99,6 +99,8 @@ class HashedSetCursorPrinter(PrettyPrinter):
         Match.Field('container',
                     Match.Pointer(HashedSetPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
+        Match.Field('position',
+                    Match.TypeName(name='ada__containers__hash_type')),
     ))
 
     def to_string(self):
