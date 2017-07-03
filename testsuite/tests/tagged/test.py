@@ -46,5 +46,5 @@ gdb.test('python'
          ' tag_addr, _ = get_dyntype_info(c);'
          ' sign_addr = int(tag_addr - 3 * system_address.sizeof - 4);'
          ' gdb.selected_inferior().write_memory(sign_addr, "aaaa")', '')
-gdb.test('python print(str(reinterpret_tagged(c)))', 
+gdb.test('python print(str(reinterpret_tagged(c)))',
          '@...gdb.MemoryError: Corrupted tag@...')

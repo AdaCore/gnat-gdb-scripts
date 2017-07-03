@@ -14,7 +14,8 @@ gdb.test('set lang auto', '')
 gdb.print_expr('null_string', '(foo__string_access) 0x0 [Invalid]')
 gdb.print_expr('empty_string', '(foo__string_access) @ADDRESS ""')
 gdb.print_expr('some_string', '(foo__string_access) @ADDRESS "Hello, world!"')
-gdb.print_expr('binary_string', '(foo__string_access) @ADDRESS "b["00"]""["ff"]"')
+gdb.print_expr('binary_string',
+               '(foo__string_access) @ADDRESS "b["00"]""["ff"]"')
 gdb.print_expr('corrupted_string', '(foo__string_access) 0x1 [Invalid]')
 
 gdb.test('python'

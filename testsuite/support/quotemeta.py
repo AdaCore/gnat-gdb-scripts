@@ -194,7 +194,7 @@ named_regexp_repository = {
     # is known, initialize_testcase routine will adjust the regexp,
     # as necessary.
     "NULL_ADDR": r'0x0',
-    }
+}
 
 
 def add_named_regexp(name, value):
