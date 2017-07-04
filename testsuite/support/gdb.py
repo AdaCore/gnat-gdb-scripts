@@ -18,6 +18,7 @@ class GDBSession(object):
 
     def __init__(self, program, log_file=None, load_gnatdbg=True):
         self.log_file = log_file or 'gdb.log'
+        self.coverage_enabled = False
 
         # TODO: handle non-native platforms
 
