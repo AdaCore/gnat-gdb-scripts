@@ -8,14 +8,15 @@ gdb_code_names = {
 }
 
 
-system_address = gdb.lookup_type('system__address')
+def get_system_address():
+    return gdb.lookup_type('system__address')
 
 
 def ptr_to_int(ptr_value):
     """
     Convert an access GDB value into the corresponding Python integer.
     """
-    return int(ptr_value.cast(system_address))
+    return int(ptr_value.cast(get_system_address()))
 
 
 def strip_typedefs(value):

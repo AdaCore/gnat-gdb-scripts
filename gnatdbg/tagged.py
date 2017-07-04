@@ -5,7 +5,7 @@ Helpers to deal with values of tagged types.
 import gdb
 
 from gnatdbg.utils import (
-    addr_to_val, encode_name, ptr_to_int, strip_typedefs, system_address
+    addr_to_val, encode_name, get_system_address, ptr_to_int, strip_typedefs
 )
 
 # The reader of this module is assumed to be familiar with how GNAT implements
@@ -19,20 +19,20 @@ SIGNATURE_SECONDARY = 'signature_secondary'
 SIGNATURES = (SIGNATURE_UNKNOWN, SIGNATURE_PRIMARY, SIGNATURE_SECONDARY)
 
 
-try:
-    _tsd_type = gdb.lookup_type('ada__tags__type_specific_data')
-except gdb.error:  # no-code-coverage
-    print('WARNING: the GNAT runtime is missing some debug information. As a'
-          ' result, some debugging features related to tagged type will not'
-          ' work.')
-    _tsd_type = None
+_tsd_type_missing = False
 
 
-def _get_tsd_type():
-    if _tsd_type is None:  # no-code-coverage
-        raise RuntimeError('Processing stopped due to missing debug'
-                           ' information in the GNAT runtime')
-    return _tsd_type
+def get_tsd_type():
+    global _tsd_type_missing
+    try:
+        return gdb.lookup_type('ada__tags__type_specific_data')
+    except gdb.error: # no-code-coverage
+        if _tsd_type_missing:
+            print('WARNING: the GNAT runtime is missing some debug'
+                  ' information.  As a result, some debugging features related'
+                  ' to tagged type will not work.')
+        _tsd_type_missing = True
+        raise
 
 
 def reinterpret_tagged(tagged_value):
@@ -53,7 +53,7 @@ def reinterpret_tagged(tagged_value):
     dyn_type = gdb.lookup_type(dyn_type_name)
 
     return addr_to_val(
-        tagged_value.address.cast(system_address) - offset_to_top,
+        tagged_value.address.cast(get_system_address()) - offset_to_top,
         dyn_type
     )
 
@@ -114,6 +114,7 @@ def decode_tag(tag_addr):
       2. The "offset to top" information.
       3. The address of the type specific data (TSD).
     """
+    system_address = get_system_address()
     tag_addr = tag_addr.cast(system_address)
 
     addr_size = system_address.sizeof
@@ -155,6 +156,7 @@ def get_dyntype_info(tagged_value):
       1. The address of the primary dispatch table.
       2. The "offset to top" information for the input value.
     """
+    system_address = get_system_address()
     tag_addr = get_tag_addr(tagged_value)
     signature, offset_to_top, _ = decode_tag(tag_addr)
 
@@ -178,8 +180,9 @@ def get_tsd(tag_addr):
     :param gdb.Value tag_addr: Value that is the address of the tag to process.
     :rtype: gdb.Value
     """
+    system_address = get_system_address()
     tsd_addr = addr_to_val(tag_addr - system_address.sizeof, system_address)
-    return addr_to_val(tsd_addr, _get_tsd_type())
+    return addr_to_val(tsd_addr, get_tsd_type())
 
 
 def tag_expanded_name(tsd):
