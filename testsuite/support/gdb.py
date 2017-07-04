@@ -24,7 +24,7 @@ class GDBSession(object):
 
         # Disable the load of .gdbinit to avoid user configuration
         # interference.
-        argv = ['gdb', '--nh', '--args', program]
+        argv = ['gdb', '--nh']
 
         os.environ['TERM'] = 'dumb'
 
@@ -57,6 +57,11 @@ end'''.format(
             # Automatically load the pretty-printers. Make sure loading happens
             # without error.
             self.test('python import gnatdbg; gnatdbg.setup()', '')
+
+        # Only then, load the inferior. Loading gnatdbg before checks that
+        # importing it does not rely on the presence of debug information.
+        self.test('file {}'.format(program),
+                  'Reading symbols from {}...done.'.format(program))
 
     def _read_to_next_prompt(self):
         """
