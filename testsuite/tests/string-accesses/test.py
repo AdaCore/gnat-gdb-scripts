@@ -16,6 +16,10 @@ gdb.print_expr('empty_string', '(foo__string_access) @ADDRESS ""')
 gdb.print_expr('some_string', '(foo__string_access) @ADDRESS "Hello, world!"')
 gdb.print_expr('binary_string',
                '(foo__string_access) @ADDRESS "b["00"]""["ff"]"')
+gdb.print_expr('wstring',
+               '(foo__wstring_access) @ADDRESS "wide string"')
+gdb.print_expr('wwstring',
+               '(foo__wwstring_access) @ADDRESS "wide wide string"')
 gdb.print_expr('corrupted_string', '(foo__string_access) 0x1 [Invalid]')
 
 gdb.test('python'

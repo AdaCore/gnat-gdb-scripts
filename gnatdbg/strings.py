@@ -92,6 +92,12 @@ class StringAccess(object):
         Match.Field('P_BOUNDS'),
     ))
 
+    default_encodings = {
+        1: None,
+        2: 'utf-16',
+        4: 'utf-32',
+    }
+
     def __init__(self, value):
         if not self.matches(value):
             raise TypeError('Input is not an access to string')
@@ -140,10 +146,18 @@ class StringAccessPrinter(PrettyPrinter):
 
     def to_string(self):
         val = StringAccess(self.value)
+
+        # Depending on the size of the character type, determine the string
+        # encoding to use to fetch the string. By default, use latin-1 which
+        # will enable us to read random binary data as bytes: we will display
+        # non-printable ASCII bytes later.
+        fatptr_type = self.value.type.strip_typedefs()
+        char_type = fatptr_type.fields()[0].type.target().target()
+        encoding = (StringAccess.default_encodings.get(char_type.sizeof, None)
+                    or 'latin-1')
+
         try:
-            # Latin-1 will enable us to read random binary data as bytes: we
-            # will display non-printable ASCII bytes later.
-            data_str = val.get_string('latin-1')
+            data_str = val.get_string(encoding)
         except gdb.MemoryError:
             str_repr = '[Invalid]'
         else:
