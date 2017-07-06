@@ -1,1 +1,3 @@
+*.adb no-precommit-check
+*.ads no-precommit-check
 *.py no-precommit-check
