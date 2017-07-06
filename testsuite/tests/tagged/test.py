@@ -42,9 +42,8 @@ gdb.test('python print(str(reinterpret_tagged(gdb.parse_and_eval("o"))))',
 
 # Corrupt Child_Type's dispatch table, in particular the signature field and
 # try to reinterpret "c" once more.
-gdb.test('python'
-         ' tag_addr, _ = get_dyntype_info(c);'
-         ' sign_addr = int(tag_addr - 3 * get_system_address().sizeof - 4);'
-         ' gdb.selected_inferior().write_memory(sign_addr, "aaaa")', '')
-gdb.test('python print(str(reinterpret_tagged(c)))',
-         '@...gdb.MemoryError: Corrupted tag@...')
+gdb.test('source corrupt_test.py',
+         'Valid tag:\n'
+         '  (i => 1, j => 2, k => 3)\n'
+         'Invalid tag:\n'
+         '  MemoryError: Corrupted tag')
