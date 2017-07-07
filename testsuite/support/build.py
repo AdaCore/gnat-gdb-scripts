@@ -3,7 +3,7 @@ import sys
 from gnatpython.ex import Run
 
 
-def gnatmake(main, cargs=[]):
+def gnatmake(main, debug=True, cargs=[]):
     """
     Run GNATmake on the given main source file.
 
@@ -14,7 +14,13 @@ def gnatmake(main, cargs=[]):
     :param list[str] cargs: Arguments for GNATmake's -cargs section.
     """
     # TODO: handle non-native platforms
-    argv = ['gnatmake', main, '-cargs'] + cargs
+    argv = ['gnatmake', main]
+    if debug:
+        argv.append('-g')
+
+    if cargs:
+        cargs.extend(['-cargs'] + cargs)
+
     p = Run(argv)
     if p.status:
         print('gnatmake failed:')

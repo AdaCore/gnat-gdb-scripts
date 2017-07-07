@@ -2,7 +2,7 @@ from support.build import gnatmake
 from support.gdb import GDBSession
 
 
-gnatmake('foo', ['-O0', '-g'])
+gnatmake('foo')
 gdb = GDBSession('foo')
 gdb.run_to(gdb.find_loc('foo.adb', 'BREAK'))
 
