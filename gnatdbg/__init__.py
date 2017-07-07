@@ -64,7 +64,7 @@ def setup():
 
 def handle_new_objfile(objfile):
     # Registers our printers only for objfiles that are Ada main entry points.
-    adainit = gdb.lookup_global_symbol('adainit')
+    adainit = gdb.lookup_global_symbol('adainit' or '_adainit')
     if adainit is None or adainit.symtab.objfile != objfile:
         return
 
