@@ -98,7 +98,7 @@ end'''.format(
             match the output.
         """
         assert self.proc.send(command)
-        output = self._read_to_next_prompt().strip()
+        output = self._read_to_next_prompt().strip().replace('\r', '')
         matcher = convert_expression(expected_output)
         if (
             expected_output is not None
