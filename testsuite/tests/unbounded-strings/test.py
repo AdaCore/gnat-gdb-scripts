@@ -16,7 +16,7 @@ gdb.print_expr('corrupted_string', 'Unbounded_String ([Invalid])')
 gdb.test('python'
          ' s = gdb.parse_and_eval("binary_string");'
          ' v = gnatdbg.strings.UnboundedString(s);'
-         ' string = v.get_string(errors="ignore");'
+         ' string = v.get_string("ascii", errors="ignore");'
          ' print(gnatdbg.utils.ada_string_repr(string))',
 
          '"b["00"]"""')
