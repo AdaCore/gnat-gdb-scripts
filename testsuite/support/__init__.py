@@ -7,6 +7,8 @@ from support.python_driver import PythonDriver
 
 
 class Testsuite(BaseTestsuite):
+
+    CROSS_SUPPORT = True
     TEST_SUBDIR = 'tests'
     DRIVERS = {
         'python': PythonDriver,
