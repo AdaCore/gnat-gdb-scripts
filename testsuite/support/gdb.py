@@ -14,7 +14,7 @@ class GDBSession(object):
     """
 
     PROMPT_RE = r'\(gdb\) '
-    TIMEOUT = 5  # In seconds
+    TIMEOUT = 15  # In seconds
 
     def __init__(self, program, log_file=None, load_gnatdbg=True):
         self.log_file = log_file or 'gdb.log'
