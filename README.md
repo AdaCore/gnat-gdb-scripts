@@ -100,12 +100,12 @@ Here are a few example for the helpers provided here in real situation:
 
     # Ada.Containers.Vectors
     (gdb) p my_vector
-    $5 = foo.str_vectors.vector of length 3 = {Unbounded_String ("one"), 
+    $5 = foo.str_vectors.vector of length 3 = {Unbounded_String ("one"),
       Unbounded_String ("two"), Unbounded_String ("three")}
 
     # Ada.Containers.Hashed_Maps
     (gdb) p my_hashed_map
-    $6 = foo.str_to_int.map of length 3 = {[Unbounded_String ("one")] = 1, 
+    $6 = foo.str_to_int.map of length 3 = {[Unbounded_String ("one")] = 1,
       [Unbounded_String ("three")] = 3, [Unbounded_String ("two")] = 2}
     (gdb) print my_hashed_map_cursor
     $7 = Cursor (Unbounded_String ("two") => 2)
