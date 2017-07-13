@@ -67,6 +67,11 @@ You can list/enable/disable pretty-printers on a case-by-case and session-wide
 basis: see the `info/enable/disable pretty-printer` commands in [GDB's
 manual](https://sourceware.org/gdb/onlinedocs/gdb/Pretty_002dPrinter-Commands.html).
 
+Note that these helpers are intrinsically tied to specific runtime
+implemenations. For instance, when the implementation of a container is
+changed, the corresponding pretty-printer must be updated. For now, the master
+branch of this repository is synchronized with GNAT Pro's development branch.
+
 
 Examples
 ========
