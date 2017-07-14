@@ -36,20 +36,20 @@ procedure Foo is
 
    US1, US2 : Unbounded_String;
 
-   V1, V2   : Str_Vectors.Vector;
-   L1, L2   : Str_Lists.List;
-   Cur_V    : Str_Vectors.Cursor;
-   Cur_L    : Str_Lists.Cursor;
+   V1, V2          : Str_Vectors.Vector;
+   L1, L2          : Str_Lists.List;
+   Cur_V, No_Cur_V : Str_Vectors.Cursor := Str_Vectors.No_Element;
+   Cur_L, No_Cur_L : Str_Lists.Cursor := Str_Lists.No_Element;
 
-   OM1, OM2 : Int_To_Str.Map;
-   OS1, OS2 : Int_Sets.Set;
-   Cur_OM   : Int_To_Str.Cursor;
-   Cur_OS   : Int_Sets.Cursor;
+   OM1, OM2          : Int_To_Str.Map;
+   OS1, OS2          : Int_Sets.Set;
+   Cur_OM, No_Cur_OM : Int_To_Str.Cursor := Int_To_Str.No_Element;
+   Cur_OS, No_Cur_OS : Int_Sets.Cursor := Int_Sets.No_Element;
 
-   HM1, HM2 : Str_To_Int.Map;
-   HS1, HS2 : Str_Sets.Set;
-   Cur_HM   : Str_To_Int.Cursor;
-   Cur_HS   : Str_Sets.Cursor;
+   HM1, HM2          : Str_To_Int.Map;
+   HS1, HS2          : Str_Sets.Set;
+   Cur_HM, No_Cur_HM : Str_To_Int.Cursor := Str_To_Int.No_Element;
+   Cur_HS, No_Cur_HS : Str_Sets.Cursor := Str_Sets.No_Element;
 
 begin
    US1 := +"Hello world!";
