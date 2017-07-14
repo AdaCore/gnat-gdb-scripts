@@ -16,7 +16,7 @@ class GDBSession(object):
     PROMPT_RE = r'\(gdb\) '
     TIMEOUT = 15  # In seconds
 
-    def __init__(self, program, log_file=None, load_gnatdbg=True):
+    def __init__(self, program=None, log_file=None, load_gnatdbg=True):
         self.log_file = log_file or 'gdb.log'
         self.coverage_enabled = False
 
@@ -58,10 +58,11 @@ end'''.format(
             # without error.
             self.test('python import gnatdbg; gnatdbg.setup()', '')
 
-        # Only then, load the inferior. Loading gnatdbg before checks that
-        # importing it does not rely on the presence of debug information.
-        self.test('file {}'.format(program),
-                  'Reading symbols from {}...done.'.format(program))
+        if program:
+            # Only then, load the inferior. Loading gnatdbg before checks that
+            # importing it does not rely on the presence of debug information.
+            self.test('file {}'.format(program),
+                      'Reading symbols from {}...done.'.format(program))
 
     def _read_to_next_prompt(self):
         """

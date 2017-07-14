@@ -60,7 +60,6 @@ class Testsuite(BaseTestsuite):
             # "coverage" package that was used to produce them. To achieve
             # this, spawn GDB just like testcases.
             gdb = GDBSession(
-                'doesnotexist',
                 log_file=os.path.join(self.coverage_dir, 'gdb.log'),
                 load_gnatdbg=False
             )
