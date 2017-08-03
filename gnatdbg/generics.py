@@ -131,7 +131,8 @@ class Match(object):
     class TypeName(BasePattern):
         """Matches a type based on its name."""
 
-        def __init__(self, pattern=None, name=None, suffix=None):
+        def __init__(self, pattern=None, name=None, suffix=None,
+                     recursive=False):
             """
             :param Matcher.BasePattern|None pattern: If provided, reject any
                 type that does not match `pattern`.
@@ -142,10 +143,15 @@ class Match(object):
 
             :param str|None suffix: If provided, reject any type whose name
                 does not end with `suffix`.
+
+            :param bool recursive: If true, consider integer basis types or
+                the target type of typedefs for matching in addition to the
+                original type.
             """
             self.type_pattern = pattern
             self.name = name
             self.suffix = suffix
+            self.recursive = recursive
 
         @property
         def short_descr(self):
@@ -156,24 +162,48 @@ class Match(object):
                 attrs.append('name=/{}/'.format(self.name.pattern))
             if self.suffix:
                 attrs.append('suffix={}'.format(self.suffix))
+            if self.recursive:
+                attrs.append('recursive=True')
             return 'TypeName({})'.format(', '.join(attrs))
 
         def _match(self, typ, mt):
-            type_name = strip_type_name_suffix(typ.name)
+            types = [typ]
 
-            with mt.scope(self, typ):
-                if (isinstance(self.name, str) and
-                        (not type_name or type_name != self.name)):
-                    return mt.tag_mismatch()
-                if (isinstance(self.name, regex_type) and
-                        (not type_name or not self.name.match(type_name))):
-                    return mt.tag_mismatch()
-                if self.suffix and not (type_name and
-                                        type_name.endswith(self.suffix)):
-                    return mt.tag_mismatch()
+            # If recursive, go fetch all types to check for matching
+            if self.recursive:
+                while typ.code in (gdb.TYPE_CODE_RANGE, gdb.TYPE_CODE_TYPEDEF):
+                    typ = typ.target()
+                    types.append(typ)
 
-                return mt.check_match(not self.type_pattern or
-                                      self.type_pattern._match(typ, mt))
+            for typ in types:
+                type_name = strip_type_name_suffix(typ.name)
+
+                with mt.scope(self, typ):
+
+                    # If a name constraint is given, check it is satisfied
+                    if (isinstance(self.name, str) and
+                            (not type_name or type_name != self.name)):
+                        continue
+                    if (isinstance(self.name, regex_type) and
+                            (not type_name or not self.name.match(type_name))):
+                        continue
+                    if self.suffix and not (type_name and
+                                            type_name.endswith(self.suffix)):
+                        continue
+
+                    # Likewise for the type sub-pattern
+                    if (self.type_pattern and
+                            not self.type_pattern._match(typ, mt)):
+                        continue
+
+                    # If we reach this point, all checks have suceeded: we
+                    # found a matching type.
+                    return True
+
+            # If we reach this point, no type we analyzed satisfied the given
+            # constraints: the original type does not match.
+            with mt.scope(self, types[0]):
+                return mt.tag_mismatch()
 
     class Pointer(BasePattern):
         """Matches a pointer type and the pointer type, if provided."""
