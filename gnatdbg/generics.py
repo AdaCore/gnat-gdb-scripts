@@ -1,8 +1,12 @@
 from contextlib import contextmanager
+import re
 
 import gdb
 
 from gnatdbg.utils import gdb_code_names, strip_type_name_suffix
+
+
+regex_type = type(re.compile('.*'))
 
 
 def type_short_descr(typ):
@@ -125,16 +129,20 @@ class Match(object):
             return type(self).__name__
 
     class TypeName(BasePattern):
-        """
-        Matches a type based on its name.
+        """Matches a type based on its name."""
 
-        Assuming the user provide any of the following, this pattern will
-        reject any type:
-          - whose name is not exactly `name`;
-          - whose name does not end with `suffix`;
-          - that does not match `pattern` (a sub-pattern).
-        """
         def __init__(self, pattern=None, name=None, suffix=None):
+            """
+            :param Matcher.BasePattern|None pattern: If provided, reject any
+                type that does not match `pattern`.
+
+            :param str|re.RegexObject|None name: If it's a string, reject any
+                type whose name is different. If it's a regular expression
+                object, reject any type whose name isn't matched by it.
+
+            :param str|None suffix: If provided, reject any type whose name
+                does not end with `suffix`.
+            """
             self.type_pattern = pattern
             self.name = name
             self.suffix = suffix
@@ -142,8 +150,10 @@ class Match(object):
         @property
         def short_descr(self):
             attrs = []
-            if self.name:
+            if isinstance(self.name, str):
                 attrs.append('name={}'.format(self.name))
+            elif isinstance(self.name, regex_type):
+                attrs.append('name=/{}/'.format(self.name.pattern))
             if self.suffix:
                 attrs.append('suffix={}'.format(self.suffix))
             return 'TypeName({})'.format(', '.join(attrs))
@@ -152,7 +162,11 @@ class Match(object):
             type_name = strip_type_name_suffix(typ.name)
 
             with mt.scope(self, typ):
-                if self.name and (not type_name or type_name != self.name):
+                if (isinstance(self.name, str) and
+                        (not type_name or type_name != self.name)):
+                    return mt.tag_mismatch()
+                if (isinstance(self.name, regex_type) and
+                        (not type_name or not self.name.match(type_name))):
                     return mt.tag_mismatch()
                 if self.suffix and not (type_name and
                                         type_name.endswith(self.suffix)):
