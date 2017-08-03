@@ -15,6 +15,7 @@ from gnatdbg.sets import (
 )
 from gnatdbg.strings import StringAccessPrinter, UnboundedStringPrinter
 from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
+from gnatdbg.utils import register_pretty_printers
 
 
 setup_done = False
@@ -51,21 +52,10 @@ def setup():
     ]:
         printers.append(printer)
 
-    # Give a chance to register our pretty-printers for all objfiles already
-    # loaded...
-    for objfile in gdb.objfiles():
-        handle_new_objfile(objfile)
-    # ... and for all objfiles to come!
-    gdb.events.new_objfile.connect(
-        lambda event: handle_new_objfile(event.new_objfile))
+    # Registers our printers only for objfiles that are Ada main entry points.
+    def objfile_filter(objfile):
+        adainit = gdb.lookup_global_symbol('adainit' or '_adainit')
+        return adainit is not None and adainit.symtab.objfile == objfile
+    register_pretty_printers(printers, objfile_filter)
 
     setup_done = True
-
-
-def handle_new_objfile(objfile):
-    # Registers our printers only for objfiles that are Ada main entry points.
-    adainit = gdb.lookup_global_symbol('adainit' or '_adainit')
-    if adainit is None or adainit.symtab.objfile != objfile:
-        return
-
-    objfile.pretty_printers.append(printers)
