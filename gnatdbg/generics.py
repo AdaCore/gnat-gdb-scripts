@@ -145,9 +145,13 @@ class Match(object):
             :param str|None suffix: If provided, reject any type whose name
                 does not end with `suffix`.
 
-            :param bool recursive: If true, consider integer basis types or
-                the target type of typedefs for matching in addition to the
-                original type.
+            :param bool recursive: If true, consider integer basis types (for
+                integer subrange types) or the target type of typedefs for
+                matching in addition to the original type.
+
+                This behavior can be surprising: for instance typedef layers
+                are used to distinguish unconstrained arrays from accesses to
+                these, so this is disabled by default.
             """
             self.type_pattern = pattern
             self.name = name
