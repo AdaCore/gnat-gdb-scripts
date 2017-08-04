@@ -139,7 +139,8 @@ class Match(object):
 
             :param str|re.RegexObject|None name: If it's a string, reject any
                 type whose name is different. If it's a regular expression
-                object, reject any type whose name isn't matched by it.
+                object, reject any type whose name isn't matched by it. The
+                regular expression must match the whole name.
 
             :param str|None suffix: If provided, reject any type whose name
                 does not end with `suffix`.
