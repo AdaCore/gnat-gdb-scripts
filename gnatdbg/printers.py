@@ -32,8 +32,8 @@ class PrettyPrinter(object):
 
     type_tag = None
     """
-    If not None, this must be a string that describe the exact name of types
-    that this pretty-printer must match.
+    If not None, this must be a string that describe the exact tag (see
+    gdb.Type.tag) of types that this pretty-printer must match.
 
     For non-generic types.
     """
@@ -91,6 +91,8 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         # docstring.
 
         # If possible, try to match the name of `val`'s type
+
+        # If possible, try to match the tag of `val`'s type
         type_tag = strip_type_name_suffix(val.type.tag)
         if type_tag is not None:
             if getattr(self.cls, 'type_tag', None):
