@@ -26,7 +26,7 @@ class OrderedSetPrinter(BaseSetPrinter):
     name            = 'Ordered_Set'
     type_tag_suffix = 'set'
 
-    type_pattern    = Match.TypeName(suffix='__set', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.set', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('tree', get_rbtree_pattern(Match.Struct(
             Match.Field('parent', Match.Typedef(Match.Pointer())),
@@ -52,7 +52,7 @@ class OrderedSetCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(OrderedSetPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
@@ -72,7 +72,7 @@ class HashedSetPrinter(BaseSetPrinter):
     name            = 'Hashed_Set'
     type_tag_suffix = 'set'
 
-    type_pattern    = Match.TypeName(suffix='__set', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.set', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('ht', get_htable_pattern(Match.Struct(
             Match.Field('element'),
@@ -95,12 +95,12 @@ class HashedSetCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(HashedSetPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
         Match.Field('position',
-                    Match.TypeName(name='ada__containers__hash_type')),
+                    Match.TypeName(name='ada.containers.hash_type')),
     ))
 
     def to_string(self):

@@ -13,14 +13,14 @@ class DoublyLinkedListPrinter(PrettyPrinter):
     type_tag_suffix = 'list'
 
     node_pattern    = Match.TypeName(
-        suffix='__node_type', pattern=Match.Struct(
+        suffix='.node_type', pattern=Match.Struct(
             Match.Field('element'),
             Match.Field('next', Match.Pointer()),
             Match.Field('prev', Match.Pointer()),
         )
     )
 
-    type_pattern    = Match.TypeName(suffix='__list', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.list', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('first',  Match.Pointer(node_pattern)),
         Match.Field('last',   Match.Pointer(node_pattern)),
@@ -60,7 +60,7 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(DoublyLinkedListPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),

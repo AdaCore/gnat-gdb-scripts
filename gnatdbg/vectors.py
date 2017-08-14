@@ -11,7 +11,7 @@ class VectorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'vector'
 
-    type_pattern    = Match.TypeName(suffix='__vector', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.vector', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('elements', Match.Pointer(
             Match.Struct(
@@ -94,7 +94,7 @@ class VectorCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(VectorPrinter.type_pattern)),
         Match.Field('index', Match.Integer()),

@@ -132,7 +132,7 @@ class Match(object):
         """Matches a type based on its name."""
 
         def __init__(self, pattern=None, name=None, suffix=None,
-                     recursive=False):
+                     recursive=False, match_pretty_name=True):
             """
             :param Matcher.BasePattern|None pattern: If provided, reject any
                 type that does not match `pattern`.
@@ -152,11 +152,17 @@ class Match(object):
                 This behavior can be surprising: for instance typedef layers
                 are used to distinguish unconstrained arrays from accesses to
                 these, so this is disabled by default.
+
+            :param bool match_pretty_name: If True, match on the pretty GDB
+                type name (`str(gdb_type)`, for instance: "foo.bar"),
+                otherwise, use the raw name (`gdb_type.name`, for instance:
+                "foo__bar___Xb").
             """
             self.type_pattern = pattern
             self.name = name
             self.suffix = suffix
             self.recursive = recursive
+            self.match_pretty_name = match_pretty_name
 
         @property
         def short_descr(self):
@@ -181,7 +187,8 @@ class Match(object):
                     types.append(typ)
 
             for typ in types:
-                type_name = strip_type_name_suffix(typ.name)
+                type_name = (str(typ) if self.match_pretty_name else
+                             strip_type_name_suffix(typ.name))
 
                 with mt.scope(self, typ):
 

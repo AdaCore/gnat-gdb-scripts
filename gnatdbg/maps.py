@@ -34,7 +34,7 @@ class OrderedMapPrinter(BaseMapPrinter):
     name            = 'Ordered_Map'
     type_tag_suffix = 'map'
 
-    type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.map', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('tree', get_rbtree_pattern(Match.Struct(
             Match.Field('parent', Match.Pointer()),
@@ -61,7 +61,7 @@ class OrderedMapCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(OrderedMapPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
@@ -84,7 +84,7 @@ class HashedMapPrinter(BaseMapPrinter):
     name            = 'Hashed_Map'
     type_tag_suffix = 'map'
 
-    type_pattern    = Match.TypeName(suffix='__map', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.map', pattern=Match.Struct(
         Match.Field('_parent'),
         Match.Field('ht', get_htable_pattern(Match.Struct(
             Match.Field('key'),
@@ -108,12 +108,12 @@ class HashedMapCursorPrinter(PrettyPrinter):
 
     type_tag_suffix = 'cursor'
 
-    type_pattern    = Match.TypeName(suffix='__cursor', pattern=Match.Struct(
+    type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(HashedMapPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
         Match.Field('position',
-                    Match.TypeName(name='ada__containers__hash_type')),
+                    Match.TypeName(name='ada.containers.hash_type')),
     ))
 
     def to_string(self):

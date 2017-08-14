@@ -6,7 +6,7 @@ from gnatdbg.printers import GDBPrettyPrinters, PrettyPrinter
 
 class MyIntPrinter(PrettyPrinter):
     name = 'My Int'
-    type_pattern = Match.TypeName(name=re.compile(r'foo__my_int_\d+'))
+    type_pattern = Match.TypeName(name=re.compile(r'foo\.my_int_\d+'))
 
     def to_string(self):
         return 'My_Int ({})'.format(int(self.value))

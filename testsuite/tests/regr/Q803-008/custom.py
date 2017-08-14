@@ -9,7 +9,7 @@ class TimePrettyPrinter(PrettyPrinter):
     name = "main.time"
     type_pattern = Match.TypeName(
         name=re.compile('universal_calendar__(T?)time(B?).*'),
-        recursive=True
+        recursive=True, match_pretty_name=False,
     )
 
     def to_string(self):
