@@ -10,10 +10,10 @@ class PrettyPrinter(object):
     Instances must comply to GDB's Pretty Printing API
     (https://sourceware.org/gdb/onlinedocs/gdb/Pretty-Printing-API.html).
 
-    Class attributes (`type_tag`, `generic`, `type_tag_suffix` and
-    `type_pattern`) must be overriden to describe the set of types that this
-    pretty-printer can match. If it must match types that have a very specific
-    name, `type_tag` must be overriden.
+    Class attributes (`type_tag`, `generic`, and `type_pattern`) must be
+    overriden to describe the set of types that this pretty-printer can match.
+    If it must match types that have a very specific name, `type_tag` must be
+    overriden.
 
     If there is no specific name, it probably means that the type comes from a
     generic package instantiation. As of today, debuggers do not know anything
@@ -36,17 +36,6 @@ class PrettyPrinter(object):
     that this pretty-printer must match.
 
     For non-generic types.
-    """
-
-    type_tag_suffix = None
-    """
-    Suffix for the instance-independent part of the symbol name of the type
-    this pretty-printer must match. For instance, if we want to match
-    "Some_Type", a type declared in a "Pkg" package that is itself declared in
-    the "Project.Gen_Module" generic package, this should be
-    "__pkg__some_type".
-
-    For generic types.
     """
 
     type_pattern = None

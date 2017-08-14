@@ -10,7 +10,6 @@ class DoublyLinkedListPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Doubly_Linked_Lists values."""
 
     name            = 'Doubly_Linked_List'
-    type_tag_suffix = 'list'
 
     node_pattern    = Match.TypeName(
         suffix='.node_type', pattern=Match.Struct(
@@ -57,8 +56,6 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Doubly_Linked_Lists.Cursor values."""
 
     name            = 'Doubly_Linked_List_Cursor'
-
-    type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',

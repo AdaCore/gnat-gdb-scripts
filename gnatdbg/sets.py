@@ -24,7 +24,6 @@ class OrderedSetPrinter(BaseSetPrinter):
     """Pretty-print Ada.Containers.Ordered_Sets.Set values."""
 
     name            = 'Ordered_Set'
-    type_tag_suffix = 'set'
 
     type_pattern    = Match.TypeName(suffix='.set', pattern=Match.Struct(
         Match.Field('_parent'),
@@ -50,8 +49,6 @@ class OrderedSetCursorPrinter(PrettyPrinter):
 
     name            = 'Ordered_Set_Cursor'
 
-    type_tag_suffix = 'cursor'
-
     type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
                     Match.Pointer(OrderedSetPrinter.type_pattern)),
@@ -70,7 +67,6 @@ class HashedSetPrinter(BaseSetPrinter):
     """Pretty-print Ada.Containers.Hashed_Sets.Set values."""
 
     name            = 'Hashed_Set'
-    type_tag_suffix = 'set'
 
     type_pattern    = Match.TypeName(suffix='.set', pattern=Match.Struct(
         Match.Field('_parent'),
@@ -92,8 +88,6 @@ class HashedSetCursorPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Hashed_Sets.Cursor values."""
 
     name            = 'Ordered_Set_Cursor'
-
-    type_tag_suffix = 'cursor'
 
     type_pattern    = Match.TypeName(suffix='.cursor', pattern=Match.Struct(
         Match.Field('container',
