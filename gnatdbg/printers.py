@@ -1,7 +1,5 @@
 import gdb
 
-from gnatdbg.utils import strip_type_name_suffix
-
 
 class PrettyPrinter(object):
     """
@@ -99,8 +97,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         return (
             (self.cls.type_pretty_name and
                 self.cls.type_pretty_name == str(val.type)) or
-            (self.cls.type_tag and
-                self.cls.type_tag == strip_type_name_suffix(val.type.tag)) or
+            (self.cls.type_tag and self.cls.type_tag == val.type.tag) or
             (self.cls.type_pattern and self.cls.type_pattern.match(val.type))
         )
 

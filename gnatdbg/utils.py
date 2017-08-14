@@ -48,22 +48,6 @@ def strip_typedefs(value):
     return value.cast(value.type.strip_typedefs())
 
 
-def strip_type_name_suffix(type_name):
-    """
-    Strip any type name suffix.
-
-    GNAT can add a suffix for body-nested package entities or for protected
-    objects.  This is completely irrelevant for our name matchers, so use this
-    helper to strip these suffixes before comparing type names.
-    """
-    if type_name:
-        for body_pkg_suffix in ('X', 'Xb', 'Xn', 'V'):
-            if type_name.endswith(body_pkg_suffix):
-                type_name = type_name[:-len(body_pkg_suffix)]
-                break
-    return type_name
-
-
 def coerce_array(array_value):
     """
     Turn `array_value` into a proper GDB array value.
