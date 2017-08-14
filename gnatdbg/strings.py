@@ -63,8 +63,8 @@ class UnboundedString(object):
 class UnboundedStringPrinter(PrettyPrinter):
     """Pretty-print Ada.Strings.Unbounded.Unbounded_String values."""
 
-    name     = 'Unbounded_String'
-    type_tag = 'ada__strings__unbounded__unbounded_string'
+    name             = 'Unbounded_String'
+    type_pretty_name = 'ada.strings.unbounded.unbounded_string'
 
     def to_string(self):
         val = UnboundedString(self.value)

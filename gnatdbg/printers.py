@@ -30,6 +30,14 @@ class PrettyPrinter(object):
     Subclasses must override this attribute.
     """
 
+    type_pretty_name = None
+    """
+    If not None, this must be a string that describes the exact name
+    (gdb.Type.__str__) of types that this pretty-printer must match.
+
+    For non-generic types.
+    """
+
     type_tag = None
     """
     If not None, this must be a string that describe the exact tag (see
@@ -86,23 +94,15 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
 
     def matches(self, val):
         """Return whether this pretty-printer matches `val`, a GDB value."""
-
         # For details about the matching features, see PrettyPrinter's class
         # docstring.
-
-        # If possible, try to match the name of `val`'s type
-
-        # If possible, try to match the tag of `val`'s type
-        type_tag = strip_type_name_suffix(val.type.tag)
-        if type_tag is not None:
-            if getattr(self.cls, 'type_tag', None):
-                return type_tag == self.cls.type_tag
-
-        # Otherwise, try to pattern match
-        if getattr(self.cls, 'type_pattern', None):
-            return self.cls.type_pattern.match(val.type)
-
-        return False
+        return (
+            (self.cls.type_pretty_name and
+                self.cls.type_pretty_name == str(val.type)) or
+            (self.cls.type_tag and
+                self.cls.type_tag == strip_type_name_suffix(val.type.tag)) or
+            (self.cls.type_pattern and self.cls.type_pattern.match(val.type))
+        )
 
     def instantiate(self, val):
         return self.cls(val)
