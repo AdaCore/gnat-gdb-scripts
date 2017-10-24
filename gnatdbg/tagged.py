@@ -53,7 +53,7 @@ def reinterpret_tagged(tagged_value):
     dyn_type = gdb.lookup_type(dyn_type_name)
 
     return addr_to_val(
-        tagged_value.address.cast(get_system_address()) - offset_to_top,
+        tagged_value.address.cast(get_system_address()) - abs(offset_to_top),
         dyn_type
     )
 
@@ -161,7 +161,8 @@ def get_dyntype_info(tagged_value):
     signature, offset_to_top, _ = decode_tag(tag_addr)
 
     if signature == SIGNATURE_SECONDARY:
-        record_addr = tagged_value.address.cast(system_address) - offset_to_top
+        record_addr = (tagged_value.address.cast(system_address) -
+                       abs(offset_to_top))
         tag_addr = get_tag_addr(record_addr.cast(tagged_value.type.pointer()))
         signature, _, _ = decode_tag(tag_addr)
 
