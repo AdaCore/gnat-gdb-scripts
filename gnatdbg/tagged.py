@@ -5,7 +5,8 @@ Helpers to deal with values of tagged types.
 import gdb
 
 from gnatdbg.utils import (
-    addr_to_val, encode_name, get_system_address, ptr_to_int, strip_typedefs
+    address_as_offset, addr_to_val, encode_name, get_system_address,
+    ptr_to_int, strip_typedefs
 )
 
 # The reader of this module is assumed to be familiar with how GNAT implements
@@ -130,9 +131,12 @@ def decode_tag(tag_addr):
     except IndexError:
         sig = '<invalid signature: {}>'.format(sig_int)
 
+    offset_to_top = address_as_offset(addr_to_val(offset_to_top_addr,
+                                                  system_address))
+
     return (
         sig,
-        int(addr_to_val(offset_to_top_addr, system_address)),
+        offset_to_top,
         addr_to_val(tsd_addr, system_address),
     )
 

@@ -37,6 +37,25 @@ def get_system_address():
     return gdb.lookup_type('system__address')
 
 
+def address_as_offset(addr):
+    """
+    In order to avoid requiring too much debug information, we use the
+    System.Address type (which is unsigned) to decode what is actually a
+    System.Storage_Elements.Storage_Offset (which is signed). This does the
+    conversion.
+
+    :param gdb.Value addr: Address to decode.
+    :rtype: int
+    """
+    addr_range_size = 2 ** (8 * addr.type.sizeof)
+    max_int = addr_range_size / 2 - 1
+    int_addr = int(addr)
+    if int_addr > max_int:
+        return int_addr - addr_range_size
+    else:
+        return int_addr
+
+
 def ptr_to_int(ptr_value):
     """
     Convert an access GDB value into the corresponding Python integer.
