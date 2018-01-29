@@ -106,8 +106,6 @@ class HashedMapCursorPrinter(PrettyPrinter):
         Match.Field('container',
                     Match.Pointer(HashedMapPrinter.type_pattern)),
         Match.Field('node', Match.Pointer()),
-        Match.Field('position',
-                    Match.TypeName(name='ada.containers.hash_type')),
     ))
 
     def to_string(self):
