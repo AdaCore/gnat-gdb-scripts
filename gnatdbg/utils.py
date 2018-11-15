@@ -1,4 +1,5 @@
 import gdb
+import gdb.printing
 
 
 gdb_code_names = {
@@ -22,7 +23,7 @@ def register_pretty_printers(printers, objfile_filter=lambda objfile: True):
 
     def register(objfile):
         if objfile_filter(objfile):
-            objfile.pretty_printers.append(printers)
+            gdb.printing.register_pretty_printer(objfile, printers)
 
     # Give a chance to register pretty-printers for all objfiles already
     # loaded...
