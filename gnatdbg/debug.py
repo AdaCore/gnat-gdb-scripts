@@ -16,7 +16,12 @@ def print_type_tree(typeobj):
 
     def helper(t, indent=1):
         indent_str = '  ' * indent
-        key = (t.code, str(t))
+        code_name = gdb_code_names[t.code]
+
+        # To avoid too verbose outputs, try to avoid describing types more than
+        # once. As we can't rely on identity of gdb.Type instances, we use
+        # instead the following tuple.
+        key = (code_name, str(t), t.name)
         try:
             no = visited[key]
         except KeyError:
