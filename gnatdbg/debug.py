@@ -43,7 +43,7 @@ def print_type_tree(typeobj):
                 first, last,
                 indent_str, helper(t.target(), indent + 1)
             )
-        elif t.code == gdb.TYPE_CODE_STRUCT:
+        elif t.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
             result += ':'
             for field in t.fields():
                 result += '\n{}{}: {}'.format(
