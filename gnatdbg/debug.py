@@ -28,10 +28,9 @@ def print_type_tree(typeobj):
             no = next(counter)
             visited[key] = no
         else:
-            return '%{} ({})'.format(no, t.name)
+            return '%{} ({} : {})'.format(no, t.name, code_name)
 
-        result = '%{} ({}) = {}'.format(no, t.name,
-                                        gdb_code_names[t.code])
+        result = '%{} ({} : {})'.format(no, t.name, code_name)
         if t.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_TYPEDEF):
             result += ':\n{}{}'.format(
                 indent_str, helper(t.target(), indent + 1)
