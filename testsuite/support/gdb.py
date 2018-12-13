@@ -36,7 +36,7 @@ class GDBSession(object):
         self.coverage_enabled = datafile is not None
         if self.coverage_enabled:
             rcfile = os.environ['COVERAGE_RCFILE']
-            self.execute('python import coverage')
+            self.import_coverage()
             self.execute('''python
 _cov = coverage.Coverage(data_file={data_file!r}, config_file={config_file!r})
 _cov.start()
@@ -63,6 +63,29 @@ end'''.format(
             # importing it does not rely on the presence of debug information.
             self.test('file {}'.format(program),
                       'Reading symbols from {}...done.'.format(program))
+
+    def import_coverage(self):
+        """
+        Import the "coverage" module in GDB's Python session.
+
+        This just does what's necessary to import the "coverage" module: this
+        excludes starting the tracing process.
+        """
+        # TODO: what follows is a hack. We assume here that the "coverage"
+        # module reachable in this testsuite script can be imported as-is from
+        # the Python intepreter embedded in GDB.
+        #
+        # This is not generally true, so it can fail. It's not clear at this
+        # point how things should be done properly, but we have this in the
+        # meantime to at least have one way to compute code coverage in some
+        # development setup.
+
+        import coverage
+        coverage_path = os.path.dirname(os.path.dirname(coverage.__file__))
+
+        self.execute('python import sys; sys.path.append({})'
+                     .format(repr(coverage_path)))
+        self.execute('python import coverage')
 
     def _read_to_next_prompt(self):
         """

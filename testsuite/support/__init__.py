@@ -63,8 +63,8 @@ class Testsuite(BaseTestsuite):
                 log_file=os.path.join(self.coverage_dir, 'gdb.log'),
                 load_gnatdbg=False
             )
-
-            gdb.execute('python import glob, coverage')
+            gdb.import_coverage()
+            gdb.execute('python import glob')
 
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
