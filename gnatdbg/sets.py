@@ -1,3 +1,7 @@
+"""
+Pretty-printers for hashed and ordered sets in Ada.Containers.
+"""
+
 from gnatdbg.generics import Match
 from gnatdbg.hash_tables import iterate, get_htable_pattern
 from gnatdbg.printers import PrettyPrinter

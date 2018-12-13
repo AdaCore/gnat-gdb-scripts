@@ -1,3 +1,7 @@
+"""
+Pretty-printers for vectors in Ada.Containers.Vectors.
+"""
+
 import gdb
 
 from gnatdbg.generics import Match

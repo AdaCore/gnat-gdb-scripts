@@ -1,3 +1,7 @@
+"""
+Helpers to match type patterns in debugged programs.
+"""
+
 from contextlib import contextmanager
 import re
 

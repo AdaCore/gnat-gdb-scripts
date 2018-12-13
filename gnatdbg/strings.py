@@ -1,3 +1,7 @@
+"""
+Pretty-printers and helpers for strings, string accesses and unbounded strings.
+"""
+
 import gdb
 
 from gnatdbg.generics import Match

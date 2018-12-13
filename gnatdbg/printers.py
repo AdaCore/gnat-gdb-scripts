@@ -1,3 +1,7 @@
+"""
+Base classes to share code for the pretty-printers defined in gnatdbg.
+"""
+
 import gdb
 
 

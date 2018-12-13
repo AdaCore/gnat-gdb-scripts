@@ -1,3 +1,7 @@
+"""
+Pretty-printers for hashed and ordered maps in Ada.Containers.
+"""
+
 from itertools import count
 
 from gnatdbg.generics import Match

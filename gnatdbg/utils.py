@@ -1,3 +1,7 @@
+"""
+Gathering of various helpers that don't deserve their own submodule.
+"""
+
 import gdb
 import gdb.printing
 

@@ -1,3 +1,7 @@
+"""
+Helpers to ease the discovery/debugging of GDB's Python API.
+"""
+
 import itertools
 
 import gdb
