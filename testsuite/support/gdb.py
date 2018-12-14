@@ -180,6 +180,16 @@ end'''.format(
         self.execute('tbreak {}'.format(location))
         self.execute('run')
 
+    def kill(self):
+        """
+        Kill the inferior process currently running.
+        """
+        # Do not run directly the "kill" command to avoid interactive prompt
+        self.test('python gdb.execute("kill")',
+                  'Kill the program being debugged? (y or n)'
+                  ' [answered Y; input not from terminal]\n'
+                  '[Inferior 1 (process @/\d+/) killed]')
+
     def stop(self):
         """
         Stop GDB.
