@@ -29,6 +29,7 @@ class GDBSession(object):
         os.environ['TERM'] = 'dumb'
 
         self.proc = ExpectProcess(argv, save_input=True, save_output=True)
+        self.alive = True
         _ = self._read_to_next_prompt()
 
         # If code coverage is enabled, start it before loading gnatdbg
@@ -38,7 +39,9 @@ class GDBSession(object):
             rcfile = os.environ['COVERAGE_RCFILE']
             self.import_coverage()
             self.execute('''python
-_cov = coverage.Coverage(data_file={data_file!r}, config_file={config_file!r})
+_cov = coverage.Coverage(data_file={data_file!r},
+                         config_file={config_file!r},
+                         auto_data=True)
 _cov.start()
 end'''.format(
                 data_file=datafile,
@@ -96,6 +99,7 @@ end'''.format(
 
         :rtype: str
         """
+        assert self.alive
         status = self.proc.expect([self.PROMPT_RE], self.TIMEOUT)
         if status is EXPECT_DIED:
             raise RuntimeError('GDB died')
@@ -121,6 +125,7 @@ end'''.format(
             output. Otherwise, it must be a quotemeta expression that must
             match the output.
         """
+        assert self.alive
         assert self.proc.send(command)
         output = self._read_to_next_prompt().strip().replace('\r', '')
         matcher = convert_expression(expected_output)
@@ -175,10 +180,24 @@ end'''.format(
         self.execute('tbreak {}'.format(location))
         self.execute('run')
 
-    def __del__(self):
+    def stop(self):
+        """
+        Stop GDB.
+
+        This writes session logs to make post-mortem debugging.
+        """
+        if not self.alive:
+            return
+
         if self.coverage_enabled:
             self.execute('python _cov.stop(); _cov.save()')
+        self.alive = False
+
         # No matter what, write the session logs to make post-mortem debugging
         # possible.
         with open(self.log_file, 'w') as f:
             f.write(self.proc.get_session_logs())
+
+    def __del__(self):
+        if self.alive:
+            self.stop()
