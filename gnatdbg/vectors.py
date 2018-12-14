@@ -59,9 +59,7 @@ class VectorPrinter(PrettyPrinter):
 
     def element(self, index):
         first, last = self.array_bounds
-        if first > last:
-            raise gdb.MemoryError('Tried to access an element in empty vector')
-        elif first <= index and index <= last:
+        if first <= index and index <= last:
             return self.array_elements[index]
         else:
             raise gdb.MemoryError(
@@ -80,13 +78,7 @@ class VectorPrinter(PrettyPrinter):
                 yield ('[{}]'.format(i), elt)
 
     def to_string(self):
-        try:
-            length = str(self.length)
-        except gdb.MemoryError:
-            status = '[invalid]'
-        else:
-            status = 'of length {}'.format(length)
-        return '{} {}'.format(str(self.value.type), status)
+        return '{} of length {}'.format(str(self.value.type), self.length)
 
 
 class VectorCursorPrinter(PrettyPrinter):
@@ -102,10 +94,7 @@ class VectorCursorPrinter(PrettyPrinter):
 
     def to_string(self):
         if self.value['container']:
-            try:
-                vector = VectorPrinter(self.value['container'])
-            except gdb.MemoryError:
-                return 'Cursor ([Invalid])'
+            vector = VectorPrinter(self.value['container'])
             index = self.value['index']
             try:
                 element = str(vector.element(index))
