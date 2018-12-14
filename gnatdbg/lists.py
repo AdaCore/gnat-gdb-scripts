@@ -41,13 +41,11 @@ class DoublyLinkedListPrinter(PrettyPrinter):
     def children(self):
         if self.value['first']:
             node = self.value['first']
-            for i in itertools.count(0):
-                if i >= self.length:
-                    raise gdb.MemoryError('The linked list seems invalid')
+            for i in range(self.length):
                 yield ('[{}]'.format(i), node['element'])
-                if node == self.value['last']:
-                    break
                 node = node['next']
+            if node:
+                raise gdb.MemoryError('The linked list seems invalid')
 
     def to_string(self):
         return '{} of length {}'.format(
