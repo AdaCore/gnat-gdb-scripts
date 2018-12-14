@@ -11,9 +11,10 @@ gdb_code_names = {
     for name in dir(gdb)
     if name.startswith('TYPE_CODE_')
 }
+objfile_filter_true = lambda objfile: True # no-code-coverage
 
 
-def register_pretty_printers(printers, objfile_filter=lambda objfile: True):
+def register_pretty_printers(printers, objfile_filter=objfile_filter_true):
     """
     Register pretty-printers in existing objfiles and register a hook to
     register them in all objfiles that will be loaded.

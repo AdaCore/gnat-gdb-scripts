@@ -16,3 +16,8 @@ gdb = GDBSession('foo', log_file='gdb-local.log', load_gnatdbg=False)
 gdb.run_to(gdb.find_loc('foo.adb', 'BREAK'))
 gdb.test('python import gnatdbg; gnatdbg.setup(globally=False)', '')
 gdb.print_expr('empty_string', 'Unbounded_String ("")')
+
+# Re-load and re-run foo, just to make sure the new_objfile event is run.
+gdb.kill()
+gdb.run_to(gdb.find_loc('foo.adb', 'BREAK'))
+gdb.print_expr('empty_string', 'Unbounded_String ("")')
