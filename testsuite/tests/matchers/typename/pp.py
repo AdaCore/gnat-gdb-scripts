@@ -12,6 +12,15 @@ class MyIntPrinter(PrettyPrinter):
         return 'My_Int ({})'.format(int(self.value))
 
 
+class MyNatPrinter(PrettyPrinter):
+    name = 'My Nat'
+    type_pattern = Match.TypeName(name='foo.my_nat')
+
+    def to_string(self):
+        return 'My_Nat ({})'.format(int(self.value))
+
+
 printers = GDBPrettyPrinters('test')
 printers.append(MyIntPrinter)
+printers.append(MyNatPrinter)
 gdb.selected_frame().function().symtab.objfile.pretty_printers.append(printers)
