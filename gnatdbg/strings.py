@@ -9,15 +9,15 @@ from gnatdbg.printers import PrettyPrinter
 from gnatdbg.utils import ada_string_repr
 
 
-def _fetch_string(array_access, length, encoding=None, errors=None):
+def _fetch_string(array_access, length, encoding, errors=None):
     """
     Fetch the string value in `array_access`.
 
     :param gdb.Value array_access: Value that is a pointer to the array that
         represents the string.
     :param int length: Length of the string to fetch.
-    :param str|None encoding: Encoding used to decode the string. Same meaning
-        as in str.decode().
+    :param str encoding: Encoding used to decode the string. Same meaning as in
+        str.decode().
     :param str|None errors: Error handling for string decoding. Same meaning
         as in str.decode().
     :rtype: str
@@ -28,9 +28,7 @@ def _fetch_string(array_access, length, encoding=None, errors=None):
     ptr_to_elt_type = array_access.type.target().target().pointer()
     ptr_to_first = array_access.cast(ptr_to_elt_type)
 
-    kwargs = {'length': length}
-    if encoding:
-        kwargs['encoding'] = encoding
+    kwargs = {'length': length, 'encoding': encoding}
     if errors:
         kwargs['errors'] = errors
     return ptr_to_first.string(**kwargs)
