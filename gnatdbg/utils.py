@@ -62,13 +62,6 @@ def address_as_offset(addr):
         return int_addr
 
 
-def ptr_to_int(ptr_value):
-    """
-    Convert an access GDB value into the corresponding Python integer.
-    """
-    return int(ptr_value.cast(get_system_address()))
-
-
 def strip_typedefs(value):
     return value.cast(value.type.strip_typedefs())
 

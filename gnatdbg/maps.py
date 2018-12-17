@@ -20,7 +20,10 @@ class BaseMapPrinter(PrettyPrinter):
         raise NotImplementedError()
 
     def children(self):
-        names = iter('[{}]'.format(i) for i in count(0))
+        # This is an infinite iterator by design: the exit path is not
+        # coverable.
+        names = iter('[{}]'.format(i) for i in count(0)) # no-code-coverage
+
         for node in self.get_node_iterator():
             yield (next(names), node['key'])
             yield (next(names), node['element'])

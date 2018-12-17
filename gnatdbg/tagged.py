@@ -6,7 +6,7 @@ import gdb
 
 from gnatdbg.utils import (
     address_as_offset, addr_to_val, encode_name, get_system_address,
-    ptr_to_int, strip_typedefs
+    strip_typedefs
 )
 
 # The reader of this module is assumed to be familiar with how GNAT implements
