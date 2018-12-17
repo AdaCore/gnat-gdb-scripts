@@ -80,6 +80,9 @@ def coerce_array(array_value):
     If it's anything else, raise a ValueError.
     """
     array_value = strip_typedefs(array_value)
+    if array_value.type.code == gdb.TYPE_CODE_REF:
+        array_value = array_value.referenced_value()
+    array_value = strip_typedefs(array_value)
 
     if (
         array_value.type.code == gdb.TYPE_CODE_STRUCT
