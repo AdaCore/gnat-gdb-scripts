@@ -193,7 +193,10 @@ def decoded_record(value):
         # parts (case <discr> is ... end case, in Ada records) or regular
         # fields.
         for f in r.type.fields():
-            if f.name.endswith(union_suffix):
+            if f.name == '_parent':
+                process_record(r[f.name])
+
+            elif f.name.endswith(union_suffix):
                 # This is an undecoded variant part, materialized as an union
                 # field whose name has follows the <discr>___XVN pattern.
                 # Compute the corresponding discriminant and decode the union.
@@ -207,8 +210,8 @@ def decoded_record(value):
                 # Just recurse on that record.
                 process_record(r[f.name])
 
-            else:
-                # This is a regular field.
+            elif not f.name.startswith('_'):
+                # This is a regular field (omit compiler-generated ones)
                 result[f.name] = r[f.name]
 
     def process_union(discr_value, u):
