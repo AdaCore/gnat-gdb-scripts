@@ -2,6 +2,8 @@
 Gathering of various helpers that don't deserve their own submodule.
 """
 
+import re
+
 import gdb
 import gdb.printing
 
@@ -12,6 +14,8 @@ gdb_code_names = {
     if name.startswith('TYPE_CODE_')
 }
 objfile_filter_true = lambda objfile: True # no-code-coverage
+
+bnpe_suffix_re = re.compile('X[bn]*$')
 
 
 def register_pretty_printers(printers, objfile_filter=objfile_filter_true):
@@ -154,6 +158,27 @@ def encode_name(name):
     :rtype: str
     """
     return name.lower().replace('.', '__')
+
+
+def pretty_typename(typ):
+    """
+    Return a pretty (Ada-like) name for the given type.
+
+    :param gdb.Type typ: Type whose name is requested.
+    :rtype: str
+    """
+    return strip_bnpe_suffix(str(typ))
+
+
+def strip_bnpe_suffix(name):
+    """
+    Strip suffix for body-nested package entities from "name".
+
+    :param str name: Name to strip.
+    :rtype: str
+    """
+    m = bnpe_suffix_re.search(name)
+    return name[:m.start()] if m else name
 
 
 def addr_to_val(addr, valtype):

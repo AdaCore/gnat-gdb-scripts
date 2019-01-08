@@ -8,6 +8,7 @@ import gdb
 
 from gnatdbg.generics import Match
 from gnatdbg.printers import PrettyPrinter
+from gnatdbg.utils import pretty_typename
 
 
 class DoublyLinkedListPrinter(PrettyPrinter):
@@ -49,7 +50,7 @@ class DoublyLinkedListPrinter(PrettyPrinter):
 
     def to_string(self):
         return '{} of length {}'.format(
-            str(self.value.type),
+            pretty_typename(self.value.type),
             self.length,
         )
 

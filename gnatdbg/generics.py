@@ -7,7 +7,7 @@ import re
 
 import gdb
 
-from gnatdbg.utils import gdb_code_names
+from gnatdbg.utils import gdb_code_names, pretty_typename
 
 
 regex_type = type(re.compile('.*'))
@@ -191,7 +191,8 @@ class Match(object):
                     types.append(typ)
 
             for typ in types:
-                type_name = str(typ) if self.match_pretty_name else typ.name
+                type_name = (pretty_typename(typ)
+                             if self.match_pretty_name else typ.name)
 
                 with mt.scope(self, typ):
 

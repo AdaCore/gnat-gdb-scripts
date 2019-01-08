@@ -6,6 +6,7 @@ import gdb
 
 from gnatdbg.generics import Match
 from gnatdbg.printers import PrettyPrinter
+from gnatdbg.utils import pretty_typename
 
 
 class VectorPrinter(PrettyPrinter):
@@ -78,7 +79,8 @@ class VectorPrinter(PrettyPrinter):
                 yield ('[{}]'.format(i), elt)
 
     def to_string(self):
-        return '{} of length {}'.format(str(self.value.type), self.length)
+        return '{} of length {}'.format(pretty_typename(self.value.type),
+                                        self.length)
 
 
 class VectorCursorPrinter(PrettyPrinter):
