@@ -21,11 +21,11 @@ is probably the following:
   - Open your GDB configuration file (`$HOME/.gdbinit`)
   - Add the following commands:
 
-        python import sys; sys.path.append("$DIR")
+        python import sys; sys.path.insert(0, "$DIR")
         python import gnatdbg; gnatdbg.setup()
 
     ... and make sure you replaced `$DIR` in the above commands with the
-    directory where you moved `gnatdbg`.
+    directory where you moved `gnatdbg` (not the path to `gnatdbg`. itself).
 
   - Congratulations, you are done!
 
