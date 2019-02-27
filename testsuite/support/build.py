@@ -19,7 +19,7 @@ def gnatmake(main, debug=True, cargs=[]):
         argv.append('-g')
 
     if cargs:
-        cargs.extend(['-cargs'] + cargs)
+        argv.extend(['-cargs'] + cargs)
 
     p = Run(argv)
     if p.status:
