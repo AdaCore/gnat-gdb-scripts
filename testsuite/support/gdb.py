@@ -65,7 +65,8 @@ end'''.format(
             # Only then, load the inferior. Loading gnatdbg before checks that
             # importing it does not rely on the presence of debug information.
             self.test('file {}'.format(program),
-                      'Reading symbols from {}...done.'.format(program))
+                      r'Reading symbols from {}...@/done|/'
+                      .format(program))
 
     def import_coverage(self):
         """
