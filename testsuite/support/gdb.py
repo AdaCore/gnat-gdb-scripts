@@ -51,6 +51,10 @@ end'''.format(
         # Enable Python backtraces to ease investigation
         self.execute('set python print-stack full')
 
+        # Disable interactive mode, which is bound to create trouble in a
+        # testsuite.
+        self.execute('set interactive-mode off')
+
         # Make the output deterministic, independent of the actual terminal
         # size.
         self.execute('set height 0')
@@ -185,8 +189,7 @@ end'''.format(
         """
         Kill the inferior process currently running.
         """
-        # Do not run directly the "kill" command to avoid interactive prompt
-        self.test('python gdb.execute("kill")',
+        self.test('kill',
                   'Kill the program being debugged? (y or n)'
                   ' [answered Y; input not from terminal]\n'
                   '[Inferior 1 (process @/\d+/) killed]')
