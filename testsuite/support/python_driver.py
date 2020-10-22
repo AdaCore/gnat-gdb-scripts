@@ -1,3 +1,5 @@
+import glob
+import logging
 import os
 import os.path
 import sys
@@ -34,3 +36,13 @@ class PythonDriver(BaseDriver):
         if self.run_and_check([sys.executable, self.PY_FILE],
                               env, error_on_output=True):
             self.result.set_status('PASSED')
+
+        # Forward GDB session logs to users, for post-mortem investigation
+        for log_file in sorted(glob.glob(self.working_dir("*.log"))):
+            with open(log_file) as f:
+                log_content = f.read()
+
+            logging.debug("== Content of: {} ==\n\n{}\n\n== END ==".format(
+                os.path.basename(log_file),
+                log_content
+            ))
