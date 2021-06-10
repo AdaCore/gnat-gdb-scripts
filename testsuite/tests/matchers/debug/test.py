@@ -11,4 +11,4 @@ Debug: mismatch:
   Struct(2 fields) <-> TYPE_CODE_STRUCT (name=foo__my_record, 2 fields)
   Field(name=n) <-> n
   TypeName(name=natural) <-> TYPE_CODE_RANGE\
- (name=positive___XDLU_1__@/.*/)""")
+ (name=positive@/(___XDLU_1__.*)?/)""")
