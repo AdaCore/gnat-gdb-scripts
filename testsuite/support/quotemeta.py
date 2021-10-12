@@ -162,7 +162,10 @@ test_expression ::= (simple_expression | named_regexp | dots
                         <dots>             ::= <escape_character> [.]
 """
 
+from __future__ import annotations
+
 import re
+from typing import List, Match, Pattern, Union
 
 default_escape_character = '@'
 
@@ -197,14 +200,14 @@ named_regexp_repository = {
 }
 
 
-def add_named_regexp(name, value):
+def add_named_regexp(name: str, value: str) -> None:
     """
     Add a named regexp to the repository.
     """
     named_regexp_repository[name] = value
 
 
-def compile_expression(expression):
+def compile_expression(expression: str) -> Pattern[str]:
     """
     Convert the test expression EXPRESSION to a python regular expression,
     compile it and return the result.
@@ -213,7 +216,7 @@ def compile_expression(expression):
     return re.compile(regexp_expression)
 
 
-def convert_expression(expression, anchored=True):
+def convert_expression(expression: str, anchored: bool = True) -> str:
     """Convert the test expression to a python regular expression.
 
     PARAMETERS
@@ -273,7 +276,7 @@ regexp_pattern = \
                re.DOTALL)
 
 
-def convert_embedded_regexp(mat):
+def convert_embedded_regexp(mat: Match[str]) -> str:
     """
     Return regular expression matched by match object MAT, which was produced
     from regexp_pattern.
@@ -293,7 +296,7 @@ def convert_embedded_regexp(mat):
         return ''
 
 
-def convert_named_regexp(name):
+def convert_named_regexp(name: str) -> str:
     """
     Return regular expression for @NAME.
     """
@@ -301,7 +304,7 @@ def convert_named_regexp(name):
     return '(?:' + named_regexp_repository[name] + ')'
 
 
-def convert_dotted_regexp(fore, aft):
+def convert_dotted_regexp(fore: str, aft: str) -> str:
     """
     Return regular expression for FORE@...AFT.  FORE and AFT are either
     empty strings or newlines.
@@ -317,15 +320,15 @@ def convert_dotted_regexp(fore, aft):
         return r'(?:.|\n)*?'
 
 
-def convert_simple_expression(text):
+def convert_simple_expression(text: str) -> str:
     """Convert simple expression (e.g. "bla bla") into a Python regexp.
     """
     regexp = re.escape(text)
-    regexp = re.sub(r"(\\ )+", r"\s*", regexp)
+    regexp = re.sub(r"(\\ )+", r"\\s*", regexp)
     return regexp
 
 
-def flat_quotemeta(expr):
+def flat_quotemeta(expr: Union[str, List[str]]) -> str:
     """Return the equivalent quotemeta expression.
 
     PARAMETERS

@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import sys
+from typing import List
 
-from gnatpython.ex import Run
+from e3.os.process import Run
 
 
-def gnatmake(main, debug=True, cargs=[]):
+def gnatmake(main: str, debug: bool = True, cargs: List[str] = []) -> None:
     """
     Run GNATmake on the given main source file.
 
