@@ -2,6 +2,7 @@ import gdb
 import gdb.printing
 
 
+from gnatdbg.big_numbers import BigIntegerPrinter, BigRealPrinter
 from gnatdbg.lists import (
     DoublyLinkedListPrinter, DoublyLinkedListCursorPrinter,
 )
@@ -31,6 +32,9 @@ def create_printers(name='gnat-runtime'):
     printers = GDBPrettyPrinters(name)
 
     for printer in [
+        BigIntegerPrinter,
+        BigRealPrinter,
+
         DoublyLinkedListPrinter,
         DoublyLinkedListCursorPrinter,
 
