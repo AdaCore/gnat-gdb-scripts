@@ -62,23 +62,29 @@ class Testsuite(BaseTestsuite):
                 load_gnatdbg=False
             )
             gdb.import_coverage()
-            gdb.execute("python import glob")
 
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
             # report.
-            gdb.execute("""python
+            script = os.path.join(self.working_dir, "coverage_script.py")
+            with open(script, "w") as f:
+                f.write("""
+import glob
+
 c = coverage.Coverage(data_file={data_file!r}, config_file={config_file!r})
 c.combine(glob.glob({data_files_glob!r}))
 c.html_report(directory={coverage_dir!r}, title="gnatdbg coverage report")
 end""".format(
-                data_file=os.path.join(ts_config.coverage_dir, ".coverage"),
-                data_files_glob=os.path.join(
-                    ts_config.coverage_dir, "*.coverage"
-                ),
-                config_file=ts_config.coverage_rcfile,
-                coverage_dir=ts_config.coverage_dir
-            ))
+                    data_file=os.path.join(
+                        ts_config.coverage_dir, ".coverage"
+                    ),
+                    data_files_glob=os.path.join(
+                        ts_config.coverage_dir, "*.coverage"
+                    ),
+                    config_file=ts_config.coverage_rcfile,
+                    coverage_dir=ts_config.coverage_dir
+                ))
+            gdb.execute(f"source {script}")
 
             html_index = os.path.join(ts_config.coverage_dir, "index.html")
             assert os.path.exists(html_index)
