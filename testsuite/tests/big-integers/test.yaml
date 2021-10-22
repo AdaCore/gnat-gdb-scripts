@@ -1,1 +1,4 @@
 driver: python
+control:
+  # TODO: remove this limitation once UA22-033 is implemented
+  - [XFAIL, "env.target.os.name == 'windows'", "uint32_t not available on Windows"]
