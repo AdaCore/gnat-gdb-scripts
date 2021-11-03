@@ -33,15 +33,17 @@ class BigInteger:
         # don't have debug info for this type, so we have to poke blindly at
         # memory.
         #
-        # We consider that big number data is layed out as an array of uint32_t
-        # values. The first one gives the number N of 32-bit digits that make
-        # up this number (24 least significant bits) and whether that number is
-        # negative (25th bit). Then the next N uint32_t values are the 32-bit
-        # digits for the big number (most significant digits first).
+        # We consider that big number data is layed out as an array of unsigned
+        # 32-bit values.  The first one gives the number N of 32-bit digits
+        # that make up this number (24 least significant bits) and whether that
+        # number is negative (25th bit). Then the next N unsigned values are
+        # the 32-bit digits for the big number (most significant digits first).
         #
         # TODO: it is not clear reading the spec how the first digit is mapped
         # on big-endian systems.
-        uint32_t = gdb.lookup_type('uint32_t')
+        uint32_t = gdb.selected_frame().architecture().integer_type(
+            32, signed=False
+        )
         data_ptr = self._bignum_address.cast(uint32_t.pointer())
 
         info = data_ptr.dereference()
