@@ -4,8 +4,6 @@ Helpers to deal with GNAT encondings related to records.
 
 from collections import OrderedDict
 
-import gdb
-
 
 class DiscriminantMatcher(object):
     """

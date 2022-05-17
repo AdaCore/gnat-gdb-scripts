@@ -2,8 +2,6 @@
 Pretty-printers for doubly-linked lists in Ada.Containers.Doubly_Linked_Lists.
 """
 
-import itertools
-
 import gdb
 
 from gnatdbg.generics import Match
