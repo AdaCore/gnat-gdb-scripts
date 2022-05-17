@@ -11,11 +11,11 @@ import gdb.printing
 gdb_code_names = {
     getattr(gdb, name): name
     for name in dir(gdb)
-    if name.startswith('TYPE_CODE_')
+    if name.startswith("TYPE_CODE_")
 }
-objfile_filter_true = lambda objfile: True # no-code-coverage
+objfile_filter_true = lambda objfile: True  # no-code-coverage
 
-bnpe_suffix_re = re.compile('X[bn]*$')
+bnpe_suffix_re = re.compile("X[bn]*$")
 
 
 def register_pretty_printers(printers, objfile_filter=objfile_filter_true):
@@ -44,7 +44,7 @@ def register_pretty_printers(printers, objfile_filter=objfile_filter_true):
 
 
 def get_system_address():
-    return gdb.lookup_type('system__address')
+    return gdb.lookup_type("system__address")
 
 
 def address_as_offset(addr):
@@ -88,20 +88,17 @@ def coerce_array(array_value):
         array_value = array_value.referenced_value()
     array_value = strip_typedefs(array_value)
 
-    if (
-        array_value.type.code == gdb.TYPE_CODE_STRUCT
-        and set(field.name for field in array_value.type.fields()) == {
-            'P_ARRAY', 'P_BOUNDS'
-        }
-    ):
-        template = array_value['P_BOUNDS']
-        array_ptr = array_value['P_ARRAY']
+    if array_value.type.code == gdb.TYPE_CODE_STRUCT and set(
+        field.name for field in array_value.type.fields()
+    ) == {"P_ARRAY", "P_BOUNDS"}:
+        template = array_value["P_BOUNDS"]
+        array_ptr = array_value["P_ARRAY"]
         if not (template and array_ptr):
             return None
 
         # Get the bounds
-        first_index = int(template['LB0'])
-        last_index = int(template['UB0'])
+        first_index = int(template["LB0"])
+        last_index = int(template["UB0"])
         if last_index < first_index:
             last_index = first_index - 1
 
@@ -117,9 +114,11 @@ def coerce_array(array_value):
         return array_ptr.cast(array_type.pointer()).dereference()
 
     if array_value.type.code != gdb.TYPE_CODE_ARRAY:
-        raise ValueError('Invalid array value: {} ({})'.format(
-            array_value, gdb_code_names[array_value.type.code]
-        ))
+        raise ValueError(
+            "Invalid array value: {} ({})".format(
+                array_value, gdb_code_names[array_value.type.code]
+            )
+        )
 
     return array_value
 
@@ -141,11 +140,11 @@ def ada_string_repr(string):
     for c in string:
         if c == '"':
             chars.append('""')
-        elif c < ' ' or c > '~':
+        elif c < " " or c > "~":
             chars.append('["{:02x}"]'.format(ord(c)))
         else:
             chars.append(c)
-    return '"{}"'.format(''.join(chars))
+    return '"{}"'.format("".join(chars))
 
 
 def encode_name(name):
@@ -157,7 +156,7 @@ def encode_name(name):
     :param str name: Name to encode:
     :rtype: str
     """
-    return name.lower().replace('.', '__')
+    return name.lower().replace(".", "__")
 
 
 def pretty_typename(typ):
@@ -178,7 +177,7 @@ def strip_bnpe_suffix(name):
     :rtype: str
     """
     m = bnpe_suffix_re.search(name)
-    return name[:m.start()] if m else name
+    return name[: m.start()] if m else name
 
 
 def addr_to_val(addr, valtype):

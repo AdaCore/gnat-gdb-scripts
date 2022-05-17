@@ -5,17 +5,20 @@ Helpers to deal with values of tagged types.
 import gdb
 
 from gnatdbg.utils import (
-    address_as_offset, addr_to_val, encode_name, get_system_address,
-    strip_typedefs
+    address_as_offset,
+    addr_to_val,
+    encode_name,
+    get_system_address,
+    strip_typedefs,
 )
 
 # The reader of this module is assumed to be familiar with how GNAT implements
 # tagged records. See a-tags.ads in GNAT's sources to learn about it.
 
 
-SIGNATURE_UNKNOWN = 'signature_unknown'
-SIGNATURE_PRIMARY = 'signature_primary'
-SIGNATURE_SECONDARY = 'signature_secondary'
+SIGNATURE_UNKNOWN = "signature_unknown"
+SIGNATURE_PRIMARY = "signature_primary"
+SIGNATURE_SECONDARY = "signature_secondary"
 
 SIGNATURES = (SIGNATURE_UNKNOWN, SIGNATURE_PRIMARY, SIGNATURE_SECONDARY)
 
@@ -26,12 +29,14 @@ _tsd_type_missing = False
 def get_tsd_type():
     global _tsd_type_missing
     try:
-        return gdb.lookup_type('ada__tags__type_specific_data')
-    except gdb.error: # no-code-coverage
+        return gdb.lookup_type("ada__tags__type_specific_data")
+    except gdb.error:  # no-code-coverage
         if _tsd_type_missing:
-            print('WARNING: the GNAT runtime is missing some debug'
-                  ' information.  As a result, some debugging features related'
-                  ' to tagged type will not work.')
+            print(
+                "WARNING: the GNAT runtime is missing some debug"
+                " information.  As a result, some debugging features related"
+                " to tagged type will not work."
+            )
         _tsd_type_missing = True
         raise
 
@@ -55,7 +60,7 @@ def reinterpret_tagged(tagged_value):
 
     return addr_to_val(
         tagged_value.address.cast(get_system_address()) - abs(offset_to_top),
-        dyn_type
+        dyn_type,
     )
 
 
@@ -74,11 +79,14 @@ def tagged_field(tagged_value, field_name, reinterpret=True):
         its dynamic type.
     :rtype: gdb.Value
     """
-    tagged_value = (reinterpret_tagged(tagged_value)
-                    if reinterpret else auto_deref_tagged(tagged_value))
+    tagged_value = (
+        reinterpret_tagged(tagged_value)
+        if reinterpret
+        else auto_deref_tagged(tagged_value)
+    )
 
     if tagged_value.type.code != gdb.TYPE_CODE_STRUCT:
-        raise TypeError('Input type is not tagged')
+        raise TypeError("Input type is not tagged")
 
     while True:
         try:
@@ -86,9 +94,9 @@ def tagged_field(tagged_value, field_name, reinterpret=True):
         except gdb.error:
             pass
         try:
-            tagged_value = tagged_value['_parent']
+            tagged_value = tagged_value["_parent"]
         except gdb.error:
-            raise gdb.error('There is no member {}'.format(field_name))
+            raise gdb.error("There is no member {}".format(field_name))
 
 
 def auto_deref_tagged(tagged_value):
@@ -119,7 +127,7 @@ def decode_tag(tag_addr):
     tag_addr = tag_addr.cast(system_address)
 
     addr_size = system_address.sizeof
-    signature_kind = gdb.lookup_type('character')
+    signature_kind = gdb.lookup_type("character")
 
     signature_addr = tag_addr - 3 * addr_size - 4
     offset_to_top_addr = tag_addr - 2 * addr_size
@@ -129,10 +137,11 @@ def decode_tag(tag_addr):
     try:
         sig = SIGNATURES[sig_int]
     except IndexError:
-        sig = '<invalid signature: {}>'.format(sig_int)
+        sig = "<invalid signature: {}>".format(sig_int)
 
-    offset_to_top = address_as_offset(addr_to_val(offset_to_top_addr,
-                                                  system_address))
+    offset_to_top = address_as_offset(
+        addr_to_val(offset_to_top_addr, system_address)
+    )
 
     return (
         sig,
@@ -148,7 +157,7 @@ def get_tag_addr(tagged_value):
     :param gdb.Value tagged_value: Value for the tagged record to process.
     :rtype: gdb.Value
     """
-    return tagged_field(tagged_value, '_tag', reinterpret=False)
+    return tagged_field(tagged_value, "_tag", reinterpret=False)
 
 
 def get_dyntype_info(tagged_value):
@@ -165,13 +174,14 @@ def get_dyntype_info(tagged_value):
     signature, offset_to_top, _ = decode_tag(tag_addr)
 
     if signature == SIGNATURE_SECONDARY:
-        record_addr = (tagged_value.address.cast(system_address) -
-                       abs(offset_to_top))
+        record_addr = tagged_value.address.cast(system_address) - abs(
+            offset_to_top
+        )
         tag_addr = get_tag_addr(record_addr.cast(tagged_value.type.pointer()))
         signature, _, _ = decode_tag(tag_addr)
 
     if signature != SIGNATURE_PRIMARY:
-        raise gdb.MemoryError('Corrupted tag')
+        raise gdb.MemoryError("Corrupted tag")
 
     return (tag_addr.cast(system_address), offset_to_top)
 
@@ -197,6 +207,6 @@ def tag_expanded_name(tsd):
     :param gdb.Value tsd: Result of the `get_tsd` function.
     :rtype: str
     """
-    char_ptr = gdb.lookup_type('character').pointer()
-    name = tsd['expanded_name'].cast(char_ptr)
+    char_ptr = gdb.lookup_type("character").pointer()
+    name = tsd["expanded_name"].cast(char_ptr)
     return name.string()

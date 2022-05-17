@@ -11,6 +11,7 @@ class DiscriminantMatcher(object):
     """
     Helper to match discriminant values.
     """
+
     def __init__(self, values, ranges, match_all):
         """
         :param list[int] values: List of values that this matcher accepts.
@@ -22,20 +23,23 @@ class DiscriminantMatcher(object):
         if match_all:
             assert values is None and ranges is None
         else:
-            assert values or ranges, '{}, {}'.format(values, ranges)
+            assert values or ranges, "{}, {}".format(values, ranges)
         self.values = values
         self.ranges = ranges
         self.match_all = match_all
 
     def __repr__(self):
         if self.match_all:
-            content = 'others'
+            content = "others"
         else:
-            content = ' | '.join(
-                [str(v) for v in self.values] +
-                ['{} .. {}'.format(first, last) for first, last in self.ranges]
+            content = " | ".join(
+                [str(v) for v in self.values]
+                + [
+                    "{} .. {}".format(first, last)
+                    for first, last in self.ranges
+                ]
             )
-        return 'DiscriminantMatcher({})'.format(content)
+        return "DiscriminantMatcher({})".format(content)
 
     @classmethod
     def decode(cls, field_name):
@@ -47,15 +51,18 @@ class DiscriminantMatcher(object):
             name).
         :rtype: DiscriminantMatcher
         """
-        if field_name == 'O':
+        if field_name == "O":
             return DiscriminantMatcher(None, None, True)
 
         # Index in field_name of the currently processed character. Wrap it in
         # a list so that local functions can modify it.
         i = [0]
 
-        error = ValueError('Invalid GNAT encoding for discriminant matcher: {}'
-                           .format(repr(field_name)))
+        error = ValueError(
+            "Invalid GNAT encoding for discriminant matcher: {}".format(
+                repr(field_name)
+            )
+        )
         values = []
         ranges = []
 
@@ -74,14 +81,14 @@ class DiscriminantMatcher(object):
             i[0] -= 1
 
         def read_number():
-            result = ''
+            result = ""
             while True:
                 c = consume_char()
                 if c is None:
                     if not result:
                         raise error
                     return int(result)
-                elif '0' <= c <= '9':
+                elif "0" <= c <= "9":
                     result += c
                 else:
                     if not result:
@@ -95,16 +102,16 @@ class DiscriminantMatcher(object):
             if c is None:
                 break
 
-            elif c == 'R':
+            elif c == "R":
                 # R<first>T<last> construct: this is a range of matched values
                 first = read_number()
                 c = consume_char()
-                if c != 'T':
+                if c != "T":
                     raise error
                 last = read_number()
                 ranges.append((first, last))
 
-            elif c == 'S':
+            elif c == "S":
                 # S<value> construct: this is a single matched value
                 values.append(read_number())
 
@@ -124,9 +131,7 @@ class DiscriminantMatcher(object):
         if self.match_all:
             return True
 
-        return any(
-            discr_value == value for value in self.values
-        ) or any(
+        return any(discr_value == value for value in self.values) or any(
             first <= discr_value <= last for first, last in self.ranges
         )
 
@@ -186,31 +191,31 @@ def decoded_record(value):
 
     result = OrderedDict()
 
-    union_suffix = '___XVN'
+    union_suffix = "___XVN"
 
     def process_record(r):
         # Go through all fields in "r", looking for either (un)decoded variant
         # parts (case <discr> is ... end case, in Ada records) or regular
         # fields.
         for f in r.type.fields():
-            if f.name == '_parent':
+            if f.name == "_parent":
                 process_record(r[f.name])
 
             elif f.name.endswith(union_suffix):
                 # This is an undecoded variant part, materialized as an union
                 # field whose name has follows the <discr>___XVN pattern.
                 # Compute the corresponding discriminant and decode the union.
-                discr_name = f.name[:-len(union_suffix)]
+                discr_name = f.name[: -len(union_suffix)]
                 discr = int(value[discr_name])
                 process_union(discr, r[f.name])
 
-            elif f.name == 'S':
+            elif f.name == "S":
                 # This is a decoded variant part, materialized as a record
                 # field that directly contains the fields we are looking for.
                 # Just recurse on that record.
                 process_record(r[f.name])
 
-            elif not f.name.startswith('_'):
+            elif not f.name.startswith("_"):
                 # This is a regular field (omit compiler-generated ones)
                 result[f.name] = r[f.name]
 
@@ -227,7 +232,7 @@ def decoded_record(value):
         while True:
             try:
                 f = next(field_names)
-            except StopIteration: # no-code-coverage
+            except StopIteration:  # no-code-coverage
                 break
 
             matcher = DiscriminantMatcher.decode(f)

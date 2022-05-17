@@ -4,16 +4,21 @@ import gdb.printing
 
 from gnatdbg.big_numbers import BigIntegerPrinter, BigRealPrinter
 from gnatdbg.lists import (
-    DoublyLinkedListPrinter, DoublyLinkedListCursorPrinter,
+    DoublyLinkedListPrinter,
+    DoublyLinkedListCursorPrinter,
 )
 from gnatdbg.maps import (
-    HashedMapPrinter, HashedMapCursorPrinter,
-    OrderedMapPrinter, OrderedMapCursorPrinter,
+    HashedMapPrinter,
+    HashedMapCursorPrinter,
+    OrderedMapPrinter,
+    OrderedMapCursorPrinter,
 )
 from gnatdbg.printers import GDBPrettyPrinters
 from gnatdbg.sets import (
-    HashedSetPrinter, HashedSetCursorPrinter,
-    OrderedSetPrinter, OrderedSetCursorPrinter,
+    HashedSetPrinter,
+    HashedSetCursorPrinter,
+    OrderedSetPrinter,
+    OrderedSetCursorPrinter,
 )
 from gnatdbg.strings import StringAccessPrinter, UnboundedStringPrinter
 from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
@@ -24,7 +29,7 @@ _setup_done = False
 _printers = None
 
 
-def create_printers(name='gnat-runtime'):
+def create_printers(name="gnat-runtime"):
     """
     Instantiate GDBPrettyPrinters with the given name and register all
     pretty-printers for the GNAT runtime in it. Return this instance.
@@ -34,23 +39,18 @@ def create_printers(name='gnat-runtime'):
     for printer in [
         BigIntegerPrinter,
         BigRealPrinter,
-
         DoublyLinkedListPrinter,
         DoublyLinkedListCursorPrinter,
-
         HashedMapPrinter,
         HashedMapCursorPrinter,
         HashedSetPrinter,
         HashedSetCursorPrinter,
-
         OrderedMapPrinter,
         OrderedMapCursorPrinter,
         OrderedSetPrinter,
         OrderedSetCursorPrinter,
-
         VectorPrinter,
         VectorCursorPrinter,
-
         UnboundedStringPrinter,
         StringAccessPrinter,
     ]:
@@ -59,7 +59,7 @@ def create_printers(name='gnat-runtime'):
     return printers
 
 
-def setup(name='gnat-runtime', globally=True):
+def setup(name="gnat-runtime", globally=True):
     """
     Instantiate pretty-printers for the GNAT runtime with the given name and
     register them.
@@ -90,7 +90,7 @@ def setup(name='gnat-runtime', globally=True):
         # Registers our printers only for objfiles that are Ada main entry
         # points.
         def objfile_filter(objfile):
-            adainit = gdb.lookup_global_symbol('adainit' or '_adainit')
+            adainit = gdb.lookup_global_symbol("adainit" or "_adainit")
             return adainit is not None and adainit.symtab.objfile == objfile
 
         register_pretty_printers(_printers, objfile_filter)

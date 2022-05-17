@@ -99,10 +99,14 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
         # For details about the matching features, see PrettyPrinter's class
         # docstring.
         return (
-            (self.cls.type_pretty_name and
-                self.cls.type_pretty_name == str(val.type)) or
-            (self.cls.type_tag and self.cls.type_tag == val.type.tag) or
-            (self.cls.type_pattern and self.cls.type_pattern.match(val.type))
+            (
+                self.cls.type_pretty_name
+                and self.cls.type_pretty_name == str(val.type)
+            )
+            or (self.cls.type_tag and self.cls.type_tag == val.type.tag)
+            or (
+                self.cls.type_pattern and self.cls.type_pattern.match(val.type)
+            )
         )
 
     def instantiate(self, val):

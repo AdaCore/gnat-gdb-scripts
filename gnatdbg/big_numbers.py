@@ -41,13 +41,13 @@ class BigInteger:
         #
         # TODO: it is not clear reading the spec how the first digit is mapped
         # on big-endian systems.
-        uint32_t = gdb.selected_frame().architecture().integer_type(
-            32, signed=False
+        uint32_t = (
+            gdb.selected_frame().architecture().integer_type(32, signed=False)
         )
         data_ptr = self._bignum_address.cast(uint32_t.pointer())
 
         info = data_ptr.dereference()
-        length = info & 0xfff
+        length = info & 0xFFF
         neg = bool(info >> 24)
 
         array_ptr_type = uint32_t.array(length).pointer()
@@ -87,8 +87,8 @@ class BigReal:
 class BigIntegerPrinter(PrettyPrinter):
     """Pretty-print Big_Integer values."""
 
-    name             = 'Big_Integer'
-    type_pretty_name = 'ada.numerics.big_numbers.big_integers.big_integer'
+    name = "Big_Integer"
+    type_pretty_name = "ada.numerics.big_numbers.big_integers.big_integer"
 
     def to_string(self):
         val = BigInteger(self.value)
@@ -97,27 +97,27 @@ class BigIntegerPrinter(PrettyPrinter):
             if val.is_valid:
                 value = val.get()
         except gdb.MemoryError:
-            value_repr = '[Invalid]'
+            value_repr = "[Invalid]"
         else:
-            value_repr = '[Uninitialized]' if value is None else str(value)
+            value_repr = "[Uninitialized]" if value is None else str(value)
 
-        return f'{self.name} ({value_repr})'
+        return f"{self.name} ({value_repr})"
 
 
 class BigRealPrinter(PrettyPrinter):
     """Pretty-print Big_Real values."""
 
-    name             = 'Big_Real'
-    type_pretty_name = 'ada.numerics.big_numbers.big_reals.big_real'
+    name = "Big_Real"
+    type_pretty_name = "ada.numerics.big_numbers.big_reals.big_real"
 
     def to_string(self):
         val = BigReal(self.value)
         try:
             value_repr = (
-                f'{val.get_numerator()} / {val.get_denominator()}'
+                f"{val.get_numerator()} / {val.get_denominator()}"
                 if val.is_valid
-                else '[Uninitialized]'
+                else "[Uninitialized]"
             )
         except gdb.MemoryError:
-            value_repr = '[Invalid]'
-        return f'{self.name} ({value_repr})'
+            value_repr = "[Invalid]"
+        return f"{self.name} ({value_repr})"

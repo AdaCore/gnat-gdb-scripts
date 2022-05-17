@@ -19,7 +19,7 @@ def print_type_tree(typeobj):
     visited = {}
 
     def helper(t, indent=1):
-        indent_str = '  ' * indent
+        indent_str = "  " * indent
         code_name = gdb_code_names[t.code]
 
         # To avoid too verbose outputs, try to avoid describing types more than
@@ -32,27 +32,25 @@ def print_type_tree(typeobj):
             no = next(counter)
             visited[key] = no
         else:
-            return '%{} ({} : {})'.format(no, t.name, code_name)
+            return "%{} ({} : {})".format(no, t.name, code_name)
 
-        result = '%{} ({} : {})'.format(no, t.name, code_name)
+        result = "%{} ({} : {})".format(no, t.name, code_name)
         if t.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_TYPEDEF):
-            result += ':\n{}{}'.format(
+            result += ":\n{}{}".format(
                 indent_str, helper(t.target(), indent + 1)
             )
         elif t.code == gdb.TYPE_CODE_INT:
-            result += ' ({} bytes)'.format(t.sizeof)
+            result += " ({} bytes)".format(t.sizeof)
         elif t.code == gdb.TYPE_CODE_ARRAY:
             first, last = t.range()
-            result += '[{} .. {}]:\n{}{}'.format(
-                first, last,
-                indent_str, helper(t.target(), indent + 1)
+            result += "[{} .. {}]:\n{}{}".format(
+                first, last, indent_str, helper(t.target(), indent + 1)
             )
         elif t.code in (gdb.TYPE_CODE_STRUCT, gdb.TYPE_CODE_UNION):
-            result += ':'
+            result += ":"
             for field in t.fields():
-                result += '\n{}{}: {}'.format(
-                    indent_str, field.name,
-                    helper(field.type, indent + 1)
+                result += "\n{}{}: {}".format(
+                    indent_str, field.name, helper(field.type, indent + 1)
                 )
         return result
 
@@ -69,7 +67,7 @@ class PrintGDBTypeTreeCommand(gdb.Command):
 
     def __init__(self):
         super(PrintGDBTypeTreeCommand, self).__init__(
-            'dbgtype', gdb.COMMAND_NONE, gdb.COMPLETE_SYMBOL
+            "dbgtype", gdb.COMMAND_NONE, gdb.COMPLETE_SYMBOL
         )
 
     def invoke(self, arg, from_tty):

@@ -15,14 +15,19 @@ def get_htable_pattern(node_pattern):
     # TODO: unfortunately, due to the current state of DWARF/GDB, it is not
     # possible to reach `node_pattern` through hash table's value type.
     return Match.Struct(
-        Match.Field('_tag'),
+        Match.Field("_tag"),
         # See below for the type of `buckets`.
-        Match.Field('buckets', Match.Typedef(Match.Struct(
-            Match.Field('P_ARRAY',  Match.Pointer()),
-            Match.Field('P_BOUNDS', Match.Pointer()),
-        ))),
-        Match.Field('length', Match.Integer()),
-        Match.Field('tc'),
+        Match.Field(
+            "buckets",
+            Match.Typedef(
+                Match.Struct(
+                    Match.Field("P_ARRAY", Match.Pointer()),
+                    Match.Field("P_BOUNDS", Match.Pointer()),
+                )
+            ),
+        ),
+        Match.Field("length", Match.Integer()),
+        Match.Field("tc"),
     )
 
 
@@ -35,11 +40,11 @@ def iterate(htable_value):
     Ada.Containers.Hash_Tables.Generic_Hash_Table_Types with Node_Type being a
     record that contains `element` and `next` fields.
     """
-    buckets = coerce_array(htable_value['buckets'])
+    buckets = coerce_array(htable_value["buckets"])
     if not buckets:
         return
 
     for node in iter_array(buckets):
         while node:
             yield node
-            node = node['next']
+            node = node["next"]
