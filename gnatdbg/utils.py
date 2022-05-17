@@ -13,7 +13,11 @@ gdb_code_names = {
     for name in dir(gdb)
     if name.startswith("TYPE_CODE_")
 }
-objfile_filter_true = lambda objfile: True  # no-code-coverage
+
+
+def objfile_filter_true(objfile):
+    return True
+
 
 bnpe_suffix_re = re.compile("X[bn]*$")
 
@@ -88,9 +92,9 @@ def coerce_array(array_value):
         array_value = array_value.referenced_value()
     array_value = strip_typedefs(array_value)
 
-    if array_value.type.code == gdb.TYPE_CODE_STRUCT and set(
+    if array_value.type.code == gdb.TYPE_CODE_STRUCT and {
         field.name for field in array_value.type.fields()
-    ) == {"P_ARRAY", "P_BOUNDS"}:
+    } == {"P_ARRAY", "P_BOUNDS"}:
         template = array_value["P_BOUNDS"]
         array_ptr = array_value["P_ARRAY"]
         if not (template and array_ptr):
