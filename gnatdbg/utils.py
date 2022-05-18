@@ -15,36 +15,7 @@ gdb_code_names = {
 }
 
 
-def objfile_filter_true(objfile):
-    return True
-
-
 bnpe_suffix_re = re.compile("X[bn]*$")
-
-
-def register_pretty_printers(printers, objfile_filter=objfile_filter_true):
-    """
-    Register pretty-printers in existing objfiles and register a hook to
-    register them in all objfiles that will be loaded.
-
-    :param gdb.printing.PrettyPrinter printers: Set of pretty-printers to
-        register.
-    :param (gdb.Objfile) -> bool objfile: Function to restrict the set of
-        objfiles into which to register pretty-printers. These will be added
-        only to objfiles for which this function returns true.
-    """
-
-    def register(objfile):
-        if objfile_filter(objfile):
-            gdb.printing.register_pretty_printer(objfile, printers)
-
-    # Give a chance to register pretty-printers for all objfiles already
-    # loaded...
-    for objfile in gdb.objfiles():
-        register(objfile)
-
-    # ... and for all objfiles to come!
-    gdb.events.new_objfile.connect(lambda event: register(event.new_objfile))
 
 
 def get_system_address():

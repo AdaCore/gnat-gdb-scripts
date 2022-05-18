@@ -81,6 +81,15 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
         instance of PrettyPrinter tied to this value. Return None
         otherwise.
         """
+        # "gdb.current_language" was added for this code, but doesn't
+        # exist in all versions of gdb yet, so check for it before
+        # calling.  The goal here is to only allow these printers to
+        # trigger when in Ada mode.
+        if (
+            hasattr(gdb, "current_language")
+            and gdb.current_language() != "ada"
+        ):
+            return None
         for printer in self.subprinters:
             if printer.enabled and printer.matches(val):
                 return printer.instantiate(val)

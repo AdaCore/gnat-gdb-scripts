@@ -22,7 +22,6 @@ from gnatdbg.sets import (
 )
 from gnatdbg.strings import StringAccessPrinter, UnboundedStringPrinter
 from gnatdbg.vectors import VectorPrinter, VectorCursorPrinter
-from gnatdbg.utils import register_pretty_printers
 
 
 _setup_done = False
@@ -80,19 +79,6 @@ def setup(name="gnat-runtime", globally=True):
     global _printers
     if _setup_done:
         return
-
     _printers = create_printers(name)
-
-    if globally:
-        gdb.printing.register_pretty_printer(None, _printers)
-
-    else:
-        # Registers our printers only for objfiles that are Ada main entry
-        # points.
-        def objfile_filter(objfile):
-            adainit = gdb.lookup_global_symbol("adainit" or "_adainit")
-            return adainit is not None and adainit.symtab.objfile == objfile
-
-        register_pretty_printers(_printers, objfile_filter)
-
+    gdb.printing.register_pretty_printer(None, _printers)
     _setup_done = True
