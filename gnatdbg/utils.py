@@ -107,21 +107,6 @@ def iter_array(array_value):
         yield array_value[i]
 
 
-def ada_string_repr(string):
-    """
-    Format `string` as an Ada string literal.
-    """
-    chars = []
-    for c in string:
-        if c == '"':
-            chars.append('""')
-        elif c < " " or c > "~":
-            chars.append('["{:02x}"]'.format(ord(c)))
-        else:
-            chars.append(c)
-    return '"{}"'.format("".join(chars))
-
-
 def encode_name(name):
     """
     Encode a qualified name into a GNAT encoded name.

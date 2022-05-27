@@ -11,16 +11,13 @@ gdb.test('set lang c',
 gdb.test('set corrupted_string.P_ARRAY = 0x1', '')
 gdb.test('set lang auto', '')
 
-gdb.print_expr('null_string', '(foo.string_access) 0x0 [Invalid]')
-gdb.print_expr('empty_string', '(foo.string_access) @ADDRESS ""')
-gdb.print_expr('some_string', '(foo.string_access) @ADDRESS "Hello, world!"')
-gdb.print_expr('binary_string',
-               '(foo.string_access) @ADDRESS "b["00"]""["ff"]"')
-gdb.print_expr('wstring',
-               '(foo.wstring_access) @ADDRESS "wide string"')
-gdb.print_expr('wwstring',
-               '(foo.wwstring_access) @ADDRESS "wide wide string"')
-gdb.print_expr('corrupted_string', '(foo.string_access) 0x1 [Invalid]')
+gdb.print_expr('null_string', '0x0 <null string access>')
+gdb.print_expr('empty_string', '""')
+gdb.print_expr('some_string', '"Hello, world!"')
+gdb.print_expr('binary_string', '"b["00"]""["ff"]"')
+gdb.print_expr('wstring', '"wide string"')
+gdb.print_expr('wwstring', '"wide wide string"')
+gdb.print_expr('corrupted_string', '<error: Cannot access memory at address 0x1>')
 
 gdb.test('python'
          ' i = gdb.parse_and_eval("i");'

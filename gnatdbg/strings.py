@@ -2,36 +2,8 @@
 Pretty-printers and helpers for strings, string accesses and unbounded strings.
 """
 
-import gdb
-
 from gnatdbg.generics import Match
 from gnatdbg.printers import PrettyPrinter
-from gnatdbg.utils import ada_string_repr
-
-
-def _fetch_string(array_access, length, encoding, errors=None):
-    """
-    Fetch the string value in `array_access`.
-
-    :param gdb.Value array_access: Value that is a pointer to the array that
-        represents the string.
-    :param int length: Length of the string to fetch.
-    :param str encoding: Encoding used to decode the string. Same meaning as in
-        str.decode().
-    :param str|None errors: Error handling for string decoding. Same meaning
-        as in str.decode().
-    :rtype: str
-    """
-    if length <= 0:
-        return ""
-
-    ptr_to_elt_type = array_access.type.target().target().pointer()
-    ptr_to_first = array_access.cast(ptr_to_elt_type)
-
-    kwargs = {"length": length, "encoding": encoding}
-    if errors:
-        kwargs["errors"] = errors
-    return ptr_to_first.string(**kwargs)
 
 
 class UnboundedString(object):
@@ -52,18 +24,13 @@ class UnboundedString(object):
         unb_str = self.value["reference"]
         return int(unb_str["last"])
 
-    def get_string(self, encoding=None, errors=None):
+    def get_string(self):
         """
         Return the string associated to this Unbounded_String.
 
         :rtype: str
         """
-        return _fetch_string(
-            self.value["reference"]["data"].address,
-            self.length,
-            encoding,
-            errors,
-        )
+        return self.value["reference"]["data"].lazy_string(length=self.length)
 
 
 class UnboundedStringPrinter(PrettyPrinter):
@@ -74,16 +41,10 @@ class UnboundedStringPrinter(PrettyPrinter):
 
     def to_string(self):
         val = UnboundedString(self.value)
-        try:
-            # Latin-1 will enable us to read random binary data as bytes: we
-            # will display non-printable ASCII bytes later.
-            data_str = val.get_string("latin-1")
-        except gdb.MemoryError:
-            str_repr = "[Invalid]"
-        else:
-            str_repr = ada_string_repr(data_str)
+        return val.get_string()
 
-        return "{} ({})".format(self.name, str_repr)
+    def display_hint(self):
+        return "string"
 
 
 class StringAccess(object):
@@ -104,12 +65,6 @@ class StringAccess(object):
             Match.Field("P_BOUNDS"),
         )
     )
-
-    default_encodings = {
-        1: None,
-        2: "utf-16",
-        4: "utf-32",
-    }
 
     def __init__(self, value):
         if not self.matches(value):
@@ -141,15 +96,24 @@ class StringAccess(object):
         lb, ub = self.bounds
         return 0 if lb > ub else (ub - lb + 1)
 
-    def get_string(self, encoding=None, errors=None):
+    def _ptr(self):
+        """Return the string pointer for this value."""
+        access = self.value["P_ARRAY"]
+        ptr_to_elt_type = access.type.target().target().pointer()
+        return access.cast(ptr_to_elt_type)
+
+    @property
+    def is_valid(self):
+        """Return True if the string is valid (has non-zero address)."""
+        return self._ptr() != 0
+
+    def get_string(self):
         """
         Return the accessed string.
 
         :rtype: str
         """
-        return _fetch_string(
-            self.value["P_ARRAY"], self.length, encoding, errors
-        )
+        return self._ptr().lazy_string(length=self.length)
 
 
 class StringAccessPrinter(PrettyPrinter):
@@ -158,27 +122,16 @@ class StringAccessPrinter(PrettyPrinter):
     name = "access String"
     type_pattern = StringAccess.type_pattern
 
+    def __init__(self, value):
+        super().__init__(value)
+        self.access = StringAccess(value)
+
     def to_string(self):
-        val = StringAccess(self.value)
+        if self.access.is_valid:
+            return self.access.get_string()
+        return "0x0 <null string access>"
 
-        # Depending on the size of the character type, determine the string
-        # encoding to use to fetch the string. By default, use latin-1 which
-        # will enable us to read random binary data as bytes: we will display
-        # non-printable ASCII bytes later.
-        fatptr_type = self.value.type.strip_typedefs()
-        char_type = fatptr_type.fields()[0].type.target().target()
-        encoding = (
-            StringAccess.default_encodings.get(char_type.sizeof, None)
-            or "latin-1"
-        )
-
-        try:
-            data_str = val.get_string(encoding)
-        except gdb.MemoryError:
-            str_repr = "[Invalid]"
-        else:
-            str_repr = ada_string_repr(data_str)
-
-        return "({}) {} {}".format(
-            self.value.type.name, self.value["P_ARRAY"], str_repr
-        )
+    def display_hint(self):
+        if self.access.is_valid:
+            return "string"
+        return None

@@ -8,15 +8,7 @@ gdb.run_to(gdb.find_loc('foo.adb', 'BREAK'))
 
 gdb.execute('set corrupted_string.reference := 0x1')
 
-gdb.print_expr('empty_string', 'Unbounded_String ("")')
-gdb.print_expr('some_string', 'Unbounded_String ("Hello, world!")')
-gdb.print_expr('binary_string', 'Unbounded_String ("b["00"]""["ff"]")')
-gdb.print_expr('corrupted_string', 'Unbounded_String ([Invalid])')
-
-gdb.test('python'
-         ' s = gdb.parse_and_eval("binary_string");'
-         ' v = gnatdbg.strings.UnboundedString(s);'
-         ' string = v.get_string("ascii", errors="ignore");'
-         ' print(gnatdbg.utils.ada_string_repr(string))',
-
-         '"b["00"]"""')
+gdb.print_expr('empty_string', '""')
+gdb.print_expr('some_string', '"Hello, world!"')
+gdb.print_expr('binary_string', '"b["00"]""["ff"]"')
+gdb.print_expr('corrupted_string', '<error reading variable: Cannot access memory at address 0x1>')

@@ -14,8 +14,8 @@ gdb.test('set variable cur.node := 2', '')
 gdb.print_expr(
     'l',
     'foo.str_lists.list of length 2 ='
-    ' {Unbounded_String ("one"),'
-    ' Unbounded_String ("two")'
+    ' {"one",'
+    ' "two"'
     '<error reading variable: The linked list seems invalid>...}'
 )
 gdb.print_expr('cur', 'Cursor ([Invalid])')
