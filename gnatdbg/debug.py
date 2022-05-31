@@ -66,9 +66,7 @@ class PrintGDBTypeTreeCommand(gdb.Command):
     """
 
     def __init__(self):
-        super(PrintGDBTypeTreeCommand, self).__init__(
-            "dbgtype", gdb.COMMAND_NONE, gdb.COMPLETE_SYMBOL
-        )
+        super().__init__("dbgtype", gdb.COMMAND_NONE, gdb.COMPLETE_SYMBOL)
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)

@@ -67,7 +67,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     """Holder for all GNAT pretty printers."""
 
     def __init__(self, name):
-        super(GDBPrettyPrinters, self).__init__(name, [])
+        super().__init__(name, [])
 
     def append(self, pretty_printer_cls):
         """
@@ -101,7 +101,7 @@ class GDBSubprinter(gdb.printing.SubPrettyPrinter):
 
     def __init__(self, cls):
         self.cls = cls
-        super(GDBSubprinter, self).__init__(cls.name)
+        super().__init__(cls.name)
 
     def matches(self, val):
         """Return whether this pretty-printer matches `val`, a GDB value."""
