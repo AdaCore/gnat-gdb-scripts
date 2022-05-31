@@ -30,14 +30,43 @@ class BaseMapPrinter(PrettyPrinter):
     def length(self) -> int:
         raise NotImplementedError()
 
+    def _is_unconstrained(
+        self, name: None | str, value: gdb.Value, item: str
+    ) -> bool:
+        """Helper method that returns True if VALUE seems to
+        come from an unconstrained map."""
+        if name is None:
+            return False
+        if value.type.name is None:
+            return False
+        if value.type.name != f"{name}.{item}_access":
+            return False
+        return value.type.strip_typedefs().code == gdb.TYPE_CODE_PTR
+
     def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         # This is an infinite iterator by design: the exit path is not
         # coverable.
         names = iter("[{}]".format(i) for i in count(0))  # no-code-coverage
 
+        # In an indefinite map, if the map type is something like
+        # "show_hashed_map.integer_hashed_maps.map",
+        # then the key will have a type named
+        # "show_hashed_map.integer_hashed_maps.key_access".
+        name = self.value.type.name
+        if name is not None and name.endswith(".map"):
+            name = name.removesuffix(".map")
+        else:
+            name = None
+
         for node in self.get_node_iterator():
-            yield (next(names), node["key"])
-            yield (next(names), node["element"])
+            key = node["key"]
+            if self._is_unconstrained(name, key, "key"):
+                key = key.dereference()
+            element = node["element"]
+            if self._is_unconstrained(name, element, "element"):
+                element = element.dereference()
+            yield (next(names), key)
+            yield (next(names), element)
 
     def to_string(self) -> str:
         return "{} of length {}".format(
