@@ -2,7 +2,7 @@ import re
 
 from gnatdbg.printers import GDBPrettyPrinters, PrettyPrinter
 from gnatdbg.generics import Match
-from gnatdbg.utils import register_pretty_printers
+from gdb.printing import register_pretty_printer
 
 
 class TimePrettyPrinter(PrettyPrinter):
@@ -18,4 +18,4 @@ class TimePrettyPrinter(PrettyPrinter):
 
 printers = GDBPrettyPrinters('custom')
 printers.append(TimePrettyPrinter)
-register_pretty_printers(printers)
+register_pretty_printer(None, printers)
