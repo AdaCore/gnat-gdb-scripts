@@ -127,7 +127,7 @@ class HashedMapPrinter(BaseMapPrinter):
 class HashedMapCursorPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Hashed_Maps.Cursor values."""
 
-    name = "Ordered_Map_Cursor"
+    name = "Hashed_Map_Cursor"
 
     type_pattern = Match.TypeName(
         suffix=".cursor",

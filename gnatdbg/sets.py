@@ -111,7 +111,7 @@ class HashedSetPrinter(BaseSetPrinter):
 class HashedSetCursorPrinter(PrettyPrinter):
     """Pretty-print Ada.Containers.Hashed_Sets.Cursor values."""
 
-    name = "Ordered_Set_Cursor"
+    name = "Hashed_Set_Cursor"
 
     type_pattern = Match.TypeName(
         suffix=".cursor",
