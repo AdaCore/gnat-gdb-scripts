@@ -295,6 +295,13 @@ class Match(object):
                     and (self.size is None or self.size == typ.sizeof)
                 )
 
+    class Bool(BasePattern):
+        """Matches all boolean types."""
+
+        def _match(self, typ, mt):
+            with mt.scope(self, typ):
+                return typ.code == gdb.TYPE_CODE_BOOL
+
     class Enum(BasePattern):
         """Matches all enumeration types."""
 

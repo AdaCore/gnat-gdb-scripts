@@ -12,6 +12,7 @@ from gnatdbg.maps import (
     HashedMapCursorPrinter,
     OrderedMapPrinter,
     OrderedMapCursorPrinter,
+    SimpleHTablePrinter,
 )
 from gnatdbg.printers import GDBPrettyPrinters
 from gnatdbg.sets import (
@@ -46,6 +47,7 @@ def create_printers(name="gnat-runtime"):
         HashedSetCursorPrinter,
         OrderedMapPrinter,
         OrderedMapCursorPrinter,
+        SimpleHTablePrinter,
         OrderedSetPrinter,
         OrderedSetCursorPrinter,
         VectorPrinter,

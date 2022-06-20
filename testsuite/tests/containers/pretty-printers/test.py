@@ -54,3 +54,9 @@ gdb.print_expr('hs1', 'foo.str_sets.set of length 3 ='
 gdb.print_expr('hs2', 'foo.str_sets.set of length 0')
 gdb.print_expr('cur_hs', 'Cursor ("two")')
 gdb.print_expr('no_cur_hs', 'Cursor (No_Element)')
+
+gdb.print_expr('dm1', 'foo.int_to_float.instance ='
+                      ' {[1] = 1.0,'
+                      '  [2] = 2.0,'
+                      '  [3] = 3.0}')
+gdb.print_expr('dm2', 'foo.int_to_float.instance is nil')
