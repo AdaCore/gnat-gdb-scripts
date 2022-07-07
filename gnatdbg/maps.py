@@ -204,9 +204,7 @@ class SimpleHTablePrinter(PrettyPrinter):
             Match.Struct(
                 Match.Field(
                     "table",
-                    Match.Typedef(
-                        Match.Array(element=Match.Typedef(Match.Pointer()))
-                    ),
+                    Match.Array(element=Match.Typedef(Match.Pointer())),
                 ),
                 Match.Field("iterator_index", Match.Integer()),
                 Match.Field("iterator_ptr", Match.Pointer()),
