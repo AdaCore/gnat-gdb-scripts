@@ -2,3 +2,5 @@
 out
 tmp*
 gnatpython
+*.egg-info
+build
