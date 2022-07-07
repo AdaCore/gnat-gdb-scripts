@@ -21,4 +21,5 @@ setup(
     packages=["gnatdbg"],
     # This requires to be run in GDB's embedded Python interpreter
     requires=[],
+    package_data={"gnatdbg": ["py.typed"]},
 )
