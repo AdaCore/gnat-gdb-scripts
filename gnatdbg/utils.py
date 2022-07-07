@@ -2,35 +2,39 @@
 Gathering of various helpers that don't deserve their own submodule.
 """
 
+from __future__ import annotations
+
 import re
+from typing import Callable, Iterator, Optional, cast
 
 import gdb
 import gdb.printing
 
 
 gdb_code_names = {
-    getattr(gdb, name): name
+    getattr(gdb, name): cast(int, name)
     for name in dir(gdb)
     if name.startswith("TYPE_CODE_")
 }
+
+ObjfileFilter = Callable[[gdb.Objfile], bool]
 
 
 bnpe_suffix_re = re.compile("X[bn]*$")
 
 
-def get_system_address():
+def get_system_address() -> gdb.Type:
     return gdb.lookup_type("system__address")
 
 
-def address_as_offset(addr):
+def address_as_offset(addr: gdb.Value) -> int:
     """
     In order to avoid requiring too much debug information, we use the
     System.Address type (which is unsigned) to decode what is actually a
     System.Storage_Elements.Storage_Offset (which is signed). This does the
     conversion.
 
-    :param gdb.Value addr: Address to decode.
-    :rtype: int
+    :param addr: Address to decode.
     """
     addr_range_size = 2 ** (8 * addr.type.sizeof)
     max_int = addr_range_size / 2 - 1
@@ -41,11 +45,11 @@ def address_as_offset(addr):
         return int_addr
 
 
-def strip_typedefs(value):
+def strip_typedefs(value: gdb.Value) -> gdb.Value:
     return value.cast(value.type.strip_typedefs())
 
 
-def coerce_array(array_value):
+def coerce_array(array_value: gdb.Value) -> Optional[gdb.Value]:
     """
     Turn `array_value` into a proper GDB array value.
 
@@ -98,54 +102,51 @@ def coerce_array(array_value):
     return array_value
 
 
-def iter_array(array_value):
+def iter_array(array_value: gdb.Value) -> Iterator[gdb.Value]:
     """Return an iterator that yields all elements in `array_value`."""
-    array_value = coerce_array(array_value)
+    v = coerce_array(array_value)
+    assert v is not None
 
-    first_index, last_index = array_value.type.range()
+    first_index, last_index = v.type.range()
     for i in range(first_index, last_index + 1):
-        yield array_value[i]
+        yield v[i]
 
 
-def encode_name(name):
+def encode_name(name: str) -> str:
     """
     Encode a qualified name into a GNAT encoded name.
 
     For instance: Foo.Bar_Type -> foo__bar_type
 
-    :param str name: Name to encode:
-    :rtype: str
+    :param name: Name to encode:
     """
     return name.lower().replace(".", "__")
 
 
-def pretty_typename(typ):
+def pretty_typename(typ: gdb.Type) -> str:
     """
     Return a pretty (Ada-like) name for the given type.
 
-    :param gdb.Type typ: Type whose name is requested.
-    :rtype: str
+    :param typ: Type whose name is requested.
     """
     return strip_bnpe_suffix(str(typ))
 
 
-def strip_bnpe_suffix(name):
+def strip_bnpe_suffix(name: str) -> str:
     """
     Strip suffix for body-nested package entities from "name".
 
-    :param str name: Name to strip.
-    :rtype: str
+    :param name: Name to strip.
     """
     m = bnpe_suffix_re.search(name)
     return name[: m.start()] if m else name
 
 
-def addr_to_val(addr, valtype):
+def addr_to_val(addr: gdb.Value, valtype: gdb.Type) -> gdb.Value:
     """
     Create a value based on the given address and type.
 
-    :param gdb.Value addr: Address to use.
-    :param gdb.Type valtype: Type to use.
-    :rtype: gdb.Value
+    :param addr: Address to use.
+    :param valtype: Type to use.
     """
     return addr.cast(valtype.pointer()).dereference()

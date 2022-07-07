@@ -3,11 +3,17 @@ Helpers to work with GNAT's implementation of hash table-based standard
 containers.
 """
 
+from __future__ import annotations
+
+from typing import Iterator
+
+import gdb
+
 from gnatdbg.generics import Match
 from gnatdbg.utils import coerce_array, iter_array
 
 
-def get_htable_pattern(node_pattern):
+def get_htable_pattern(node_pattern: Match.TypePattern) -> Match.TypePattern:
     """
     Return the type pattern for hash tables used in GNAT's implementation of
     standard containers for nodes that match the given `node_pattern`.
@@ -31,7 +37,7 @@ def get_htable_pattern(node_pattern):
     )
 
 
-def iterate(htable_value):
+def iterate(htable_value: gdb.Value) -> Iterator[gdb.Value]:
     """
     Return an iterator on all nodes in `htable_value`.
 

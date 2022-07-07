@@ -29,7 +29,7 @@ _setup_done = False
 _printers = None
 
 
-def create_printers(name="gnat-runtime"):
+def create_printers(name: str = "gnat-runtime") -> GDBPrettyPrinters:
     """
     Instantiate GDBPrettyPrinters with the given name and register all
     pretty-printers for the GNAT runtime in it. Return this instance.
@@ -60,7 +60,7 @@ def create_printers(name="gnat-runtime"):
     return printers
 
 
-def setup(name="gnat-runtime", globally=True):
+def setup(name: str = "gnat-runtime", globally: bool = True) -> None:
     """
     Instantiate pretty-printers for the GNAT runtime with the given name and
     register them.

@@ -3,8 +3,13 @@ Pretty-printers for hashed and ordered maps in Ada.Containers and
 GNAT.Dynamic_HTables.
 """
 
+from __future__ import annotations
+
 from itertools import count
 import re
+from typing import Iterator, Tuple
+
+import gdb
 
 from gnatdbg.generics import Match
 from gnatdbg.hash_tables import iterate, get_htable_pattern
@@ -16,13 +21,16 @@ from gnatdbg.utils import coerce_array, iter_array, pretty_typename
 class BaseMapPrinter(PrettyPrinter):
     """Base class for map pretty-printers."""
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return "map"
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         raise NotImplementedError()
 
-    def children(self):
+    def length(self) -> int:
+        raise NotImplementedError()
+
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         # This is an infinite iterator by design: the exit path is not
         # coverable.
         names = iter("[{}]".format(i) for i in count(0))  # no-code-coverage
@@ -31,7 +39,7 @@ class BaseMapPrinter(PrettyPrinter):
             yield (next(names), node["key"])
             yield (next(names), node["element"])
 
-    def to_string(self):
+    def to_string(self) -> str:
         return "{} of length {}".format(
             pretty_typename(self.value.type), self.length
         )
@@ -63,10 +71,10 @@ class OrderedMapPrinter(BaseMapPrinter):
     )
 
     @property
-    def length(self):
-        return self.value["tree"]["length"]
+    def length(self) -> int:
+        return int(self.value["tree"]["length"])
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         return dfs(self.value["tree"])
 
 
@@ -85,7 +93,7 @@ class OrderedMapCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
             assoc = "{} => {}".format(
                 self.value["node"]["key"],
@@ -119,10 +127,10 @@ class HashedMapPrinter(BaseMapPrinter):
     )
 
     @property
-    def length(self):
-        return self.value["ht"]["length"]
+    def length(self) -> int:
+        return int(self.value["ht"]["length"])
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         return iterate(self.value["ht"])
 
 
@@ -144,7 +152,7 @@ class HashedMapCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
             assoc = "{} => {}".format(
                 self.value["node"]["key"],
@@ -166,21 +174,22 @@ class SimpleHTablePrinter(PrettyPrinter):
 
     name = "Simple_HTable"
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return "map"
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         if not self.value:
             return
 
         buckets = coerce_array(self.value["table"])
+        assert buckets is not None
 
         for node in iter_array(buckets):
             while node:
                 yield node
                 node = node["next"]
 
-    def children(self):
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         # This is an infinite iterator by design: the exit path is not
         # coverable.
         names = iter("[{}]".format(i) for i in count(0))  # no-code-coverage
@@ -189,7 +198,7 @@ class SimpleHTablePrinter(PrettyPrinter):
             yield (next(names), node["k"])
             yield (next(names), node["e"])
 
-    def to_string(self):
+    def to_string(self) -> str:
         # Strip the "access ..." prefix
         # Replace the ".tag.instance_data" suffix with ".instance"
         return re.sub(

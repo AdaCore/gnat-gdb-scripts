@@ -3,10 +3,16 @@ Helpers to work with GNAT's implementation of red-black tree-based standard
 containers.
 """
 
+from __future__ import annotations
+
+from typing import Iterator
+
+import gdb
+
 from gnatdbg.generics import Match
 
 
-def get_rbtree_pattern(node_pattern):
+def get_rbtree_pattern(node_pattern: Match.TypePattern) -> Match.TypePattern:
     """
     Return the type pattern for red-black trees used in GNAT's implementation
     of standard containers for nodes that match the given `node_pattern`.
@@ -22,7 +28,7 @@ def get_rbtree_pattern(node_pattern):
     )
 
 
-def dfs(tree_value):
+def dfs(tree_value: gdb.Value) -> Iterator[gdb.Value]:
     """
     Return an iterator on all nodes in `tree_value`.
 
@@ -32,7 +38,7 @@ def dfs(tree_value):
     fields.
     """
 
-    def traverse_node(node_value):
+    def traverse_node(node_value: gdb.Value) -> Iterator[gdb.Value]:
         if node_value["left"]:
             for node in traverse_node(node_value["left"]):
                 yield node

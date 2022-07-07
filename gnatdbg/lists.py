@@ -2,6 +2,10 @@
 Pretty-printers for doubly-linked lists in Ada.Containers.Doubly_Linked_Lists.
 """
 
+from __future__ import annotations
+
+from typing import Iterator, Tuple
+
 import gdb
 
 from gnatdbg.generics import Match
@@ -34,14 +38,14 @@ class DoublyLinkedListPrinter(PrettyPrinter):
         ),
     )
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return "array"
 
     @property
-    def length(self):
-        return self.value["length"]
+    def length(self) -> int:
+        return int(self.value["length"])
 
-    def children(self):
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         if self.value["first"]:
             node = self.value["first"]
             for i in range(self.length):
@@ -50,7 +54,7 @@ class DoublyLinkedListPrinter(PrettyPrinter):
             if node:
                 raise gdb.MemoryError("The linked list seems invalid")
 
-    def to_string(self):
+    def to_string(self) -> str:
         return "{} of length {}".format(
             pretty_typename(self.value.type),
             self.length,
@@ -73,10 +77,10 @@ class DoublyLinkedListCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return "array"
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
             try:
                 assoc = "{}".format(self.value["node"]["element"])

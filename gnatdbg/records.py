@@ -2,55 +2,44 @@
 Helpers to deal with GNAT encondings related to records.
 """
 
+from __future__ import annotations
+
 from collections import OrderedDict
+from typing import Dict, List, Optional, Tuple
+
+import gdb
 
 
-class DiscriminantMatcher(object):
+class DiscriminantMatcher:
     """
     Helper to match discriminant values.
     """
 
-    def __init__(self, values, ranges, match_all):
-        """
-        :param list[int] values: List of values that this matcher accepts.
-        :param list[(int, int)] ranges: List of inclusive ranges that this
-            matcher accepts.
-        :param bool match_all: Whether this matcher must match all discriminant
-            values.
-        """
-        if match_all:
-            assert values is None and ranges is None
-        else:
-            assert values or ranges, "{}, {}".format(values, ranges)
-        self.values = values
-        self.ranges = ranges
-        self.match_all = match_all
+    @property
+    def _content_repr(self) -> str:
+        raise NotImplementedError
 
-    def __repr__(self):
-        if self.match_all:
-            content = "others"
-        else:
-            content = " | ".join(
-                [str(v) for v in self.values]
-                + [
-                    "{} .. {}".format(first, last)
-                    for first, last in self.ranges
-                ]
-            )
-        return "DiscriminantMatcher({})".format(content)
+    def match(self, discr_value: int) -> bool:
+        """
+        Return whether this matches accepts the given discriminant value.
 
-    @classmethod
-    def decode(cls, field_name):
+        :param discr_value: Discriminant value to check.
+        """
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return f"DiscriminantMatcher({self._content_repr})"
+
+    @staticmethod
+    def decode(field_name: str) -> DiscriminantMatcher:
         """
         Parse a GNAT encoding for a discriminant matcher. These correspond to
         "when" clauses.
 
-        :param str field_name: GNAT encoding to parse (this is a union field
-            name).
-        :rtype: DiscriminantMatcher
+        :param field_name: GNAT encoding to parse (this is a union field name).
         """
         if field_name == "O":
-            return DiscriminantMatcher(None, None, True)
+            return AllDiscriminantMatcher()
 
         # Index in field_name of the currently processed character. Wrap it in
         # a list so that local functions can modify it.
@@ -68,17 +57,17 @@ class DiscriminantMatcher(object):
         if not field_name:
             raise error
 
-        def consume_char():
+        def consume_char() -> Optional[str]:
             if i[0] >= len(field_name):
                 return None
             i[0] += 1
             return field_name[i[0] - 1]
 
-        def go_back():
+        def go_back() -> None:
             assert i[0] > 0
             i[0] -= 1
 
-        def read_number():
+        def read_number() -> int:
             result = ""
             while True:
                 c = consume_char()
@@ -117,24 +106,41 @@ class DiscriminantMatcher(object):
                 # Anything else is a parsing error
                 raise error
 
-        return DiscriminantMatcher(values, ranges, False)
+        return SomeDiscriminantMatcher(values, ranges)
 
-    def match(self, discr_value):
+
+class AllDiscriminantMatcher(DiscriminantMatcher):
+    @property
+    def _content_repr(self) -> str:
+        return "others"
+
+    def match(self, discr_value: int) -> bool:
+        return True
+
+
+class SomeDiscriminantMatcher(DiscriminantMatcher):
+    def __init__(self, values: List[int], ranges: List[Tuple[int, int]]):
         """
-        Return whether this matches accepts the given discriminant value.
-
-        :param int discr_value: Discriminant value to check.
-        :rtype: bool
+        :param values: List of values that this matcher accepts.
+        :param ranges: List of inclusive ranges that this matcher accepts.
         """
-        if self.match_all:
-            return True
+        self.values = values
+        self.ranges = ranges
 
+    @property
+    def _content_repr(self) -> str:
+        return " | ".join(
+            [str(v) for v in self.values]
+            + ["{} .. {}".format(first, last) for first, last in self.ranges]
+        )
+
+    def match(self, discr_value: int) -> bool:
         return any(discr_value == value for value in self.values) or any(
             first <= discr_value <= last for first, last in self.ranges
         )
 
 
-def decoded_record(value):
+def decoded_record(value: gdb.Value) -> Dict[str, gdb.Value]:
     """
     Decode a record value whose fields involve GNAT encodings.
 
@@ -187,15 +193,16 @@ def decoded_record(value):
         {'n': 11, 'index': <value>, 'i': <value>}
     """
 
-    result = OrderedDict()
+    result: Dict[str, gdb.Value] = OrderedDict()
 
     union_suffix = "___XVN"
 
-    def process_record(r):
+    def process_record(r: gdb.Value) -> None:
         # Go through all fields in "r", looking for either (un)decoded variant
         # parts (case <discr> is ... end case, in Ada records) or regular
         # fields.
         for f in r.type.fields():
+            assert f.name
             if f.name == "_parent":
                 process_record(r[f.name])
 
@@ -217,7 +224,7 @@ def decoded_record(value):
                 # This is a regular field (omit compiler-generated ones)
                 result[f.name] = r[f.name]
 
-    def process_union(discr_value, u):
+    def process_union(discr_value: int, u: gdb.Value) -> None:
         # This union (u) materializes a variant part controlled by the given
         # discriminant value (discr). Look for the variant that matches the
         # given "discr" value.
@@ -232,6 +239,7 @@ def decoded_record(value):
                 f = next(field_names)
             except StopIteration:  # no-code-coverage
                 break
+            assert f
 
             matcher = DiscriminantMatcher.decode(f)
             if matcher.match(discr_value):

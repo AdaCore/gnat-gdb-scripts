@@ -2,6 +2,10 @@
 Helpers to deal with values of tagged types.
 """
 
+from __future__ import annotations
+
+from typing import Tuple
+
 import gdb
 
 from gnatdbg.utils import (
@@ -26,7 +30,7 @@ SIGNATURES = (SIGNATURE_UNKNOWN, SIGNATURE_PRIMARY, SIGNATURE_SECONDARY)
 _tsd_type_missing = False
 
 
-def get_tsd_type():
+def get_tsd_type() -> gdb.Type:
     global _tsd_type_missing
     try:
         return gdb.lookup_type("ada__tags__type_specific_data")
@@ -41,16 +45,13 @@ def get_tsd_type():
         raise
 
 
-def reinterpret_tagged(tagged_value):
+def reinterpret_tagged(tagged_value: gdb.Value) -> gdb.Value:
     """
     Reinterpret a tagged value according to its dynamic type.
 
     For instance, assume Child_Type derives from the Root_Type tagged type.
     This function will turn a Child_Type object with a Root_Type type into a
     true Child_Type value.
-
-    :param gdb.Value tagged_value: Tagged value to re-interpret.
-    :rtype: gdb.Value
     """
     tagged_value = auto_deref_tagged(tagged_value)
     primary_tag_addr, offset_to_top = get_dyntype_info(tagged_value)
@@ -64,7 +65,9 @@ def reinterpret_tagged(tagged_value):
     )
 
 
-def tagged_field(tagged_value, field_name, reinterpret=True):
+def tagged_field(
+    tagged_value: gdb.Value, field_name: str, reinterpret: bool = True
+) -> gdb.Value:
     """
     Look for a field in a tagged record's own and all its inherited fields.
 
@@ -72,12 +75,11 @@ def tagged_field(tagged_value, field_name, reinterpret=True):
     contains another record (for fields from the parent type) that contains
     another record, etc.
 
-    :param gdb.Value tagged_value: Can be either a tagged record or an access
-        to a tagged record.
-    :param str field_name: Name of the field to look up.
-    :param bool reinterpret: If True, re-interpret `tagged_value` according to
-        its dynamic type.
-    :rtype: gdb.Value
+    :param tagged_value: Can be either a tagged record or an access to a tagged
+        record.
+    :param field_name: Name of the field to look up.
+    :param reinterpret: If True, re-interpret `tagged_value` according to its
+        dynamic type.
     """
     tagged_value = (
         reinterpret_tagged(tagged_value)
@@ -99,13 +101,12 @@ def tagged_field(tagged_value, field_name, reinterpret=True):
             raise gdb.error("There is no member {}".format(field_name))
 
 
-def auto_deref_tagged(tagged_value):
+def auto_deref_tagged(tagged_value: gdb.Value) -> gdb.Value:
     """
     Dereference access and strip typedefs layers around a tagged record.
 
-    :param gdb.Value tagged_value: GDB value whose type can be either a
-        (typedef'd) tagged type or a (typedef'd) access to a tagged type.
-    :rtype: gdb.Value
+    :param tagged_value: GDB value whose type can be either a (typedef'd)
+        tagged type or a (typedef'd) access to a tagged type.
     """
     tagged_value = strip_typedefs(tagged_value)
     while tagged_value.type.code in (gdb.TYPE_CODE_PTR, gdb.TYPE_CODE_REF):
@@ -113,12 +114,12 @@ def auto_deref_tagged(tagged_value):
     return tagged_value
 
 
-def decode_tag(tag_addr):
+def decode_tag(tag_addr: gdb.Value) -> Tuple[str, int, gdb.Value]:
     """
     Extract some information from a tag.
 
-    :param gdb.Value tag_addr: Pointer/access to the tag to process.
-    :return (str, int, gdb.Value): A tuple that contains:
+    :param tag_addr: Pointer/access to the tag to process.
+    :return: A tuple that contains:
       1. The signature kind for this tag.
       2. The "offset to top" information.
       3. The address of the type specific data (TSD).
@@ -150,22 +151,21 @@ def decode_tag(tag_addr):
     )
 
 
-def get_tag_addr(tagged_value):
+def get_tag_addr(tagged_value: gdb.Value) -> gdb.Value:
     """
     Return the address of the tag corresponding to the given tagged value.
 
-    :param gdb.Value tagged_value: Value for the tagged record to process.
-    :rtype: gdb.Value
+    :param tagged_value: Value for the tagged record to process.
     """
     return tagged_field(tagged_value, "_tag", reinterpret=False)
 
 
-def get_dyntype_info(tagged_value):
+def get_dyntype_info(tagged_value: gdb.Value) -> Tuple[gdb.Value, int]:
     """
     Compute information about the dynamic type of a tagged value.
 
-    :param gdb.Value tagged_value: Value for the tagged record to process.
-    :return (gdb.Value, int): A tuple that contains:
+    :param tagged_value: Value for the tagged record to process.
+    :return: A tuple that contains:
       1. The address of the primary dispatch table.
       2. The "offset to top" information for the input value.
     """
@@ -186,26 +186,24 @@ def get_dyntype_info(tagged_value):
     return (tag_addr.cast(system_address), offset_to_top)
 
 
-def get_tsd(tag_addr):
+def get_tsd(tag_addr: gdb.Value) -> gdb.Value:
     """
     Get the type specific data corresponding to a tag.
 
     This assumes that the tag is a primary dispatch table.
 
-    :param gdb.Value tag_addr: Value that is the address of the tag to process.
-    :rtype: gdb.Value
+    :param tag_addr: Value that is the address of the tag to process.
     """
     system_address = get_system_address()
     tsd_addr = addr_to_val(tag_addr - system_address.sizeof, system_address)
     return addr_to_val(tsd_addr, get_tsd_type())
 
 
-def tag_expanded_name(tsd):
+def tag_expanded_name(tsd: gdb.Value) -> str:
     """
     Get the expanded name corresponding to a tag.
 
-    :param gdb.Value tsd: Result of the `get_tsd` function.
-    :rtype: str
+    :param tsd: Result of the `get_tsd` function.
     """
     char_ptr = gdb.lookup_type("character").pointer()
     name = tsd["expanded_name"].cast(char_ptr)

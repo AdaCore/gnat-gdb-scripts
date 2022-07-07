@@ -2,6 +2,12 @@
 Pretty-printers for hashed and ordered sets in Ada.Containers.
 """
 
+from __future__ import annotations
+
+from typing import Iterator, Tuple
+
+import gdb
+
 from gnatdbg.generics import Match
 from gnatdbg.hash_tables import iterate, get_htable_pattern
 from gnatdbg.printers import PrettyPrinter
@@ -12,13 +18,19 @@ from gnatdbg.utils import pretty_typename
 class BaseSetPrinter(PrettyPrinter):
     """Base class for set pretty-printers."""
 
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
+        raise NotImplementedError()
+
+    def length(self) -> int:
+        raise NotImplementedError()
+
     # TODO: GDB has no 'set' display hint yet. Update this once it is the case!
 
-    def children(self):
+    def children(self) -> Iterator[Tuple[str, gdb.Value]]:
         for i, node in enumerate(self.get_node_iterator()):
             yield ("[{}]".format(i), node["element"])
 
-    def to_string(self):
+    def to_string(self) -> str:
         return "{} of length {}".format(
             pretty_typename(self.value.type), self.length
         )
@@ -49,10 +61,10 @@ class OrderedSetPrinter(BaseSetPrinter):
     )
 
     @property
-    def length(self):
-        return self.value["tree"]["length"]
+    def length(self) -> int:
+        return int(self.value["tree"]["length"])
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         return dfs(self.value["tree"])
 
 
@@ -71,9 +83,9 @@ class OrderedSetCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
-            assoc = self.value["node"]["element"]
+            assoc = str(self.value["node"]["element"])
         else:
             assoc = "No_Element"
         return "Cursor ({})".format(assoc)
@@ -101,10 +113,10 @@ class HashedSetPrinter(BaseSetPrinter):
     )
 
     @property
-    def length(self):
-        return self.value["ht"]["length"]
+    def length(self) -> int:
+        return int(self.value["ht"]["length"])
 
-    def get_node_iterator(self):
+    def get_node_iterator(self) -> Iterator[gdb.Value]:
         return iterate(self.value["ht"])
 
 
@@ -126,9 +138,9 @@ class HashedSetCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
-            assoc = self.value["node"]["element"]
+            assoc = str(self.value["node"]["element"])
         else:
             assoc = "No_Element"
         return "Cursor ({})".format(assoc)

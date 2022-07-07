@@ -2,10 +2,18 @@
 Base classes to share code for the pretty-printers defined in gnatdbg.
 """
 
+from __future__ import annotations
+
+from typing import Optional, TYPE_CHECKING, Type
+
 import gdb
 
 
-class PrettyPrinter(object):
+if TYPE_CHECKING:
+    import gnatdbg.generics
+
+
+class PrettyPrinter:
     """
     Base class for pretty-printers.
 
@@ -25,14 +33,14 @@ class PrettyPrinter(object):
     In this case, subclasses must override all these attributes.
     """
 
-    name = None
+    name: str
     """
     Human-readable string to describe this pretty-printer.
 
     Subclasses must override this attribute.
     """
 
-    type_pretty_name = None
+    type_pretty_name: Optional[str] = None
     """
     If not None, this must be a string that describes the exact name
     (gdb.Type.__str__) of types that this pretty-printer must match.
@@ -40,7 +48,7 @@ class PrettyPrinter(object):
     For non-generic types.
     """
 
-    type_tag = None
+    type_tag: Optional[str] = None
     """
     If not None, this must be a string that describe the exact tag (see
     gdb.Type.tag) of types that this pretty-printer must match.
@@ -48,7 +56,7 @@ class PrettyPrinter(object):
     For non-generic types.
     """
 
-    type_pattern = None
+    type_pattern: Optional[gnatdbg.generics.Match.BasePattern] = None
     """
     If not None, this must be an instance of gnatdbg.generics.Match.BasePattern
     subclasses, to describe the type pattern to match.
@@ -56,26 +64,26 @@ class PrettyPrinter(object):
     For generic types.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: gdb.Value):
         self.value = value
 
-    def to_string(self):
+    def to_string(self) -> str | gdb.LazyString:
         raise NotImplementedError()
 
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     """Holder for all GNAT pretty printers."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super().__init__(name, [])
 
-    def append(self, pretty_printer_cls):
+    def append(self, pretty_printer_cls: Type[PrettyPrinter]) -> None:
         """
         Add an instance of GDBSubprinter for the given `pretty_printer_cls`.
         """
         self.subprinters.append(GDBSubprinter(pretty_printer_cls))
 
-    def __call__(self, val):
+    def __call__(self, val: gdb.Value) -> Optional[PrettyPrinter]:
         """
         If there is one enabled pretty-printer that matches `val`, return an
         instance of PrettyPrinter tied to this value. Return None
@@ -91,6 +99,7 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
         ):
             return None
         for printer in self.subprinters:
+            assert isinstance(printer, GDBSubprinter)
             if printer.enabled and printer.matches(val):
                 return printer.instantiate(val)
         return None
@@ -99,24 +108,25 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
 class GDBSubprinter(gdb.printing.SubPrettyPrinter):
     """Holder for PrettyPrinter subclasses."""
 
-    def __init__(self, cls):
+    def __init__(self, cls: Type[PrettyPrinter]):
         self.cls = cls
         super().__init__(cls.name)
 
-    def matches(self, val):
+    def matches(self, val: gdb.Value) -> bool:
         """Return whether this pretty-printer matches `val`, a GDB value."""
         # For details about the matching features, see PrettyPrinter's class
         # docstring.
         return (
             (
-                self.cls.type_pretty_name
+                bool(self.cls.type_pretty_name)
                 and self.cls.type_pretty_name == str(val.type)
             )
-            or (self.cls.type_tag and self.cls.type_tag == val.type.tag)
+            or (bool(self.cls.type_tag) and self.cls.type_tag == val.type.tag)
             or (
-                self.cls.type_pattern and self.cls.type_pattern.match(val.type)
+                self.cls.type_pattern is not None
+                and self.cls.type_pattern.match(val.type)
             )
         )
 
-    def instantiate(self, val):
+    def instantiate(self, val: gdb.Value) -> PrettyPrinter:
         return self.cls(val)

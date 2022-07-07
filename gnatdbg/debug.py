@@ -2,23 +2,26 @@
 Helpers to ease the discovery/debugging of GDB's Python API.
 """
 
+from __future__ import annotations
+
 import itertools
+from typing import Dict, Tuple
 
 import gdb
 
 from gnatdbg.utils import gdb_code_names
 
 
-def print_type_tree(typeobj):
+def print_type_tree(typeobj: gdb.Type) -> None:
     """
     Print a GDB type as a tree on the standard output.
 
     :param gdb.Type typeobj: Root type for the tree to print.
     """
     counter = iter(itertools.count(0))
-    visited = {}
+    visited: Dict[Tuple[int, str, str], int] = {}
 
-    def helper(t, indent=1):
+    def helper(t: gdb.Type, indent: int = 1) -> str:
         indent_str = "  " * indent
         code_name = gdb_code_names[t.code]
 
@@ -65,10 +68,10 @@ class PrintGDBTypeTreeCommand(gdb.Command):
     GDB view of user types, i.e. trees of gdb.Type instances.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("dbgtype", gdb.COMMAND_NONE, gdb.COMPLETE_SYMBOL)
 
-    def invoke(self, arg, from_tty):
+    def invoke(self, arg: str, from_tty: bool) -> None:
         argv = gdb.string_to_argv(arg)
         typeobj = gdb.parse_and_eval(argv[0]).type
         print_type_tree(typeobj)

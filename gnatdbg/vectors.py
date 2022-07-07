@@ -2,6 +2,10 @@
 Pretty-printers for vectors in Ada.Containers.Vectors.
 """
 
+from __future__ import annotations
+
+from typing import Iterable, Optional, Tuple, Union
+
 import gdb
 
 from gnatdbg.generics import Match
@@ -32,11 +36,11 @@ class VectorPrinter(PrettyPrinter):
         ),
     )
 
-    def display_hint(self):
+    def display_hint(self) -> str:
         return "array"
 
     @property
-    def array_bounds(self):
+    def array_bounds(self) -> Tuple[int, int]:
         elements = self.value["elements"]
         if not elements:
             return (1, 0)
@@ -46,7 +50,7 @@ class VectorPrinter(PrettyPrinter):
         return (first_index, last_index)
 
     @property
-    def length(self):
+    def length(self) -> int:
         first, last = self.array_bounds
         if first <= last:
             return last - first + 1
@@ -54,7 +58,7 @@ class VectorPrinter(PrettyPrinter):
             return 0
 
     @property
-    def array_elements(self):
+    def array_elements(self) -> Optional[gdb.Value]:
         first, last = self.array_bounds
         if first <= last:
             base_value = self.value["elements"]["ea"]
@@ -62,10 +66,13 @@ class VectorPrinter(PrettyPrinter):
         else:
             return None
 
-    def element(self, index):
+    def element(self, index: Union[int, gdb.Value]) -> gdb.Value:
+        idx = int(index)
         first, last = self.array_bounds
-        if first <= index and index <= last:
-            return self.array_elements[index]
+        if first <= idx and idx <= last:
+            elts = self.array_elements
+            assert elts is not None
+            return elts[idx]
         else:
             raise gdb.MemoryError(
                 "Out of bound vector access ({} not in {} ..  {})".format(
@@ -73,7 +80,7 @@ class VectorPrinter(PrettyPrinter):
                 )
             )
 
-    def children(self):
+    def children(self) -> Iterable[Tuple[str, gdb.Value]]:
         elements = self.array_elements
         if elements:
             first_index, last_index = elements.type.range()
@@ -82,7 +89,7 @@ class VectorPrinter(PrettyPrinter):
                 elt.fetch_lazy()
                 yield ("[{}]".format(i), elt)
 
-    def to_string(self):
+    def to_string(self) -> str:
         return "{} of length {}".format(
             pretty_typename(self.value.type), self.length
         )
@@ -103,7 +110,7 @@ class VectorCursorPrinter(PrettyPrinter):
         ),
     )
 
-    def to_string(self):
+    def to_string(self) -> str:
         if self.value["container"]:
             vector = VectorPrinter(self.value["container"])
             index = self.value["index"]

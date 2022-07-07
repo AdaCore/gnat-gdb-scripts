@@ -13,21 +13,21 @@ class BigInteger:
     Helper class to inspect Big_Integer values.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: gdb.Value):
         self.value = value
 
     @property
-    def _bignum_address(self):
+    def _bignum_address(self) -> gdb.Value:
         return self.value["value"]["c"]
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """
         Return whether this big integer is valid.
         """
         return bool(self._bignum_address)
 
-    def get(self):
+    def get(self) -> int:
         # The data structure used to store big numbers is
         # System.Shared_Bignums.Bignum_Data. Unfortunately, in most cases we
         # don't have debug info for this type, so we have to poke blindly at
@@ -54,7 +54,7 @@ class BigInteger:
         data_array = data_ptr.cast(array_ptr_type).dereference()
 
         result = 0
-        for i in range(length):
+        for i in range(int(length)):
             result = result << 32 | int(data_array[i + 1])
 
         if neg:
@@ -68,19 +68,19 @@ class BigReal:
     Helper class to inspect Big_Real values.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: gdb.Value):
         self.value = value
         self.numerator = BigInteger(value["num"])
         self.denominator = BigInteger(value["den"])
 
     @property
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self.numerator.is_valid and self.denominator.is_valid
 
-    def get_numerator(self):
+    def get_numerator(self) -> int:
         return self.numerator.get()
 
-    def get_denominator(self):
+    def get_denominator(self) -> int:
         return self.denominator.get()
 
 
@@ -90,7 +90,7 @@ class BigIntegerPrinter(PrettyPrinter):
     name = "Big_Integer"
     type_pretty_name = "ada.numerics.big_numbers.big_integers.big_integer"
 
-    def to_string(self):
+    def to_string(self) -> str:
         val = BigInteger(self.value)
         value = None
         try:
@@ -110,7 +110,7 @@ class BigRealPrinter(PrettyPrinter):
     name = "Big_Real"
     type_pretty_name = "ada.numerics.big_numbers.big_reals.big_real"
 
-    def to_string(self):
+    def to_string(self) -> str:
         val = BigReal(self.value)
         try:
             value_repr = (

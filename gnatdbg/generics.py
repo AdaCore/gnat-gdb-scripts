@@ -2,8 +2,11 @@
 Helpers to match type patterns in debugged programs.
 """
 
+from __future__ import annotations
+
 from contextlib import contextmanager
 import re
+from typing import Iterator, List, Optional, Pattern, Union
 
 import gdb
 
@@ -13,7 +16,7 @@ from gnatdbg.utils import gdb_code_names, pretty_typename
 regex_type = type(re.compile(".*"))
 
 
-def type_short_descr(typ):
+def type_short_descr(typ: gdb.Type) -> str:
     """Return a human-readable description of `typ`, a GDB type."""
     attrs = []
     if typ.name:
@@ -23,14 +26,14 @@ def type_short_descr(typ):
     return "{} ({})".format(gdb_code_names[typ.code], ", ".join(attrs))
 
 
-class MatchTrace(object):
+class MatchTrace:
     """Container for type pattern matching traces.
 
     This holds traceback-like information about the current type pattern
     matching state.
     """
 
-    class Scope(object):
+    class Scope:
         """Single entry for the traceback-like information.
 
         This holds two attributes: `pattern`, which is the Match.BasePattern
@@ -38,17 +41,19 @@ class MatchTrace(object):
         that this pattern must match.
         """
 
-        def __init__(self, pattern, value):
+        def __init__(self, pattern: str, value: Optional[str]):
             self.pattern = pattern
             self.value = value
             self.matched = True
 
-    def __init__(self):
-        self.scopes_stack = []
-        self.mismatch_stack = None
+    def __init__(self) -> None:
+        self.scopes_stack: List[MatchTrace.Scope] = []
+        self.mismatch_stack: Optional[List[MatchTrace.Scope]] = None
 
     @contextmanager
-    def scope(self, pattern, actual):
+    def scope(
+        self, pattern: Match.BasePattern, actual: Union[gdb.Type, gdb.Field]
+    ) -> Iterator[None]:
         """
         Context manager to register a Scope for the current matched pattern.
         """
@@ -63,7 +68,7 @@ class MatchTrace(object):
         yield
         self.scopes_stack.pop()
 
-    def tag_mismatch(self):
+    def tag_mismatch(self) -> bool:
         """Register the current traceback for a type pattern mismatch.
 
         Return False for convenience.
@@ -72,7 +77,7 @@ class MatchTrace(object):
             self.mismatch_stack = list(self.scopes_stack)
         return False
 
-    def check_match(self, has_matched):
+    def check_match(self, has_matched: bool) -> bool:
         """
         Check that `has_matched` is True. If not, register the current
         traceback for a type pattern mismatch.
@@ -80,7 +85,7 @@ class MatchTrace(object):
         return has_matched or self.tag_mismatch()
 
 
-class Match(object):
+class Match:
     """
     Namespace whose nested classes help matching type patterns.
 
@@ -99,10 +104,42 @@ class Match(object):
         )
     """
 
-    class BasePattern(object):
+    class BasePattern:
         """Interface for type patterns."""
 
-        def _match(self, typ, mt):
+        @property
+        def short_descr(self) -> str:
+            """Return a short string to describe this pattern matcher.
+
+            Helper for the tracking framework.
+            """
+            return type(self).__name__
+
+        def match(
+            self, entity: Union[gdb.Type, gdb.Field], debug: bool = False
+        ) -> bool:
+            """Return whether `self` matches the given GDB entity.
+
+            If `debug` is true and the match failed, print a description of the
+            chain of checks that led to the mismatch.
+            """
+            mt = MatchTrace()
+            if isinstance(entity, gdb.Type):
+                assert isinstance(self, Match.TypePattern)
+                res = self._match(entity, mt)
+            else:
+                assert isinstance(self, Match.Field)
+                res = self._match_field(entity, mt)
+
+            if debug and not res:
+                print("Debug: mismatch:")
+                assert mt.mismatch_stack is not None
+                for scope in mt.mismatch_stack:
+                    print("  {} <-> {}".format(scope.pattern, scope.value))
+            return res
+
+    class TypePattern(BasePattern):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             """Return whether `self` matches a GDB type.
 
             Return whether `self` matches the `typ` input GDB type. In the
@@ -112,52 +149,30 @@ class Match(object):
             """
             raise NotImplementedError()
 
-        def match(self, value_type, debug=False):
-            """Return whether `self` matches the `value_type` GDB type.
-
-            If `debug` is true and the match failed, print a description of the
-            chain of checks that led to the mismatch.
-            """
-            mt = MatchTrace()
-            res = self._match(value_type, mt)
-            if debug and not res:
-                print("Debug: mismatch:")
-                for scope in mt.mismatch_stack:
-                    print("  {} <-> {}".format(scope.pattern, scope.value))
-            return res
-
-        @property
-        def short_descr(self):
-            """Return a short string to describe this pattern matcher.
-
-            Helper for the tracking framework.
-            """
-            return type(self).__name__
-
-    class TypeName(BasePattern):
+    class TypeName(TypePattern):
         """Matches a type based on its name."""
 
         def __init__(
             self,
-            pattern=None,
-            name=None,
-            suffix=None,
-            recursive=False,
-            match_pretty_name=True,
+            pattern: Optional[Match.TypePattern] = None,
+            name: Optional[Union[str, Pattern[str]]] = None,
+            suffix: Optional[str] = None,
+            recursive: bool = False,
+            match_pretty_name: bool = True,
         ):
             """
-            :param Matcher.BasePattern|None pattern: If provided, reject any
-                type that does not match `pattern`.
+            :param pattern: If provided, reject any type that does not match
+                `pattern`.
 
-            :param str|re.RegexObject|None name: If it's a string, reject any
-                type whose name is different. If it's a regular expression
-                object, reject any type whose name isn't matched by it. The
-                regular expression must match the whole name.
+            :param name: If it's a string, reject any type whose name is
+                different. If it's a regular expression object, reject any type
+                whose name isn't matched by it. The regular expression must
+                match the whole name.
 
-            :param str|None suffix: If provided, reject any type whose name
-                does not end with `suffix`.
+            :param suffix: If provided, reject any type whose name does not end
+                with `suffix`.
 
-            :param bool recursive: If true, consider integer basis types (for
+            :param recursive: If true, consider integer basis types (for
                 integer subrange types) or the target type of typedefs for
                 matching in addition to the original type.
 
@@ -165,10 +180,9 @@ class Match(object):
                 are used to distinguish unconstrained arrays from accesses to
                 these, so this is disabled by default.
 
-            :param bool match_pretty_name: If True, match on the pretty GDB
-                type name (`str(gdb_type)`, for instance: "foo.bar"),
-                otherwise, use the raw name (`gdb_type.name`, for instance:
-                "foo__bar___Xb").
+            :param match_pretty_name: If True, match on the pretty GDB type
+                name (`str(gdb_type)`, for instance: "foo.bar"), otherwise, use
+                the raw name (`gdb_type.name`, for instance: "foo__bar___Xb").
             """
             self.type_pattern = pattern
             self.name = name
@@ -177,7 +191,7 @@ class Match(object):
             self.match_pretty_name = match_pretty_name
 
         @property
-        def short_descr(self):
+        def short_descr(self) -> str:
             attrs = []
             if isinstance(self.name, str):
                 attrs.append("name={}".format(self.name))
@@ -189,7 +203,7 @@ class Match(object):
                 attrs.append("recursive=True")
             return "TypeName({})".format(", ".join(attrs))
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             types = [typ]
 
             # If recursive, go fetch all types to check for matching
@@ -236,13 +250,13 @@ class Match(object):
             with mt.scope(self, types[0]):
                 return mt.tag_mismatch()
 
-    class Pointer(BasePattern):
+    class Pointer(TypePattern):
         """Matches a pointer type and the pointer type, if provided."""
 
-        def __init__(self, target=None):
+        def __init__(self, target: Optional[Match.TypePattern] = None):
             self.target = target
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             # TODO: types are wrapped in typedefs in a too inconsistent way.
             # For instance, say B is a pointer that is stored inside a
             # structure A; then when B has been known to be a TYPE_CODE_PTR
@@ -260,13 +274,13 @@ class Match(object):
                     )
                 )
 
-    class Typedef(BasePattern):
+    class Typedef(TypePattern):
         """Matches a typedef and the underlying type, if provided."""
 
-        def __init__(self, target=None):
+        def __init__(self, target: Optional[Match.TypePattern] = None):
             self.target = target
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 return mt.check_match(
                     typ.code == gdb.TYPE_CODE_TYPEDEF
@@ -276,48 +290,53 @@ class Match(object):
                     )
                 )
 
-    class Integer(BasePattern):
+    class Integer(TypePattern):
         """Matches an integer/range type, according to its size if asked to."""
 
-        def __init__(self, size=None):
+        def __init__(self, size: Optional[int] = None):
             self.size = size
 
         @property
-        def short_descr(self):
+        def short_descr(self) -> str:
             return "Integer({})".format(
                 "size={}".format(self.size) if self.size else ""
             )
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 return mt.check_match(
                     typ.code in (gdb.TYPE_CODE_INT, gdb.TYPE_CODE_RANGE)
                     and (self.size is None or self.size == typ.sizeof)
                 )
 
-    class Bool(BasePattern):
+    class Bool(TypePattern):
         """Matches all boolean types."""
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 return typ.code == gdb.TYPE_CODE_BOOL
 
-    class Enum(BasePattern):
+    class Enum(TypePattern):
         """Matches all enumeration types."""
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 return typ.code == gdb.TYPE_CODE_ENUM
 
-    class Array(BasePattern):
+    class Array(TypePattern):
         """Matches array types and attributes depending on what is provided."""
 
-        def __init__(self, element=None, first=None, last=None):
+        def __init__(
+            self,
+            element: Optional[Match.TypePattern] = None,
+            first: Optional[int] = None,
+            last: Optional[int] = None,
+        ):
             self.element = element
             self.first, self.last = first, last
 
         @property
-        def short_descr(self):
+        def short_descr(self) -> str:
             attrs = []
             if self.first is not None:
                 attrs.append("first={}".format(self.first))
@@ -325,7 +344,7 @@ class Match(object):
                 attrs.append("last={}".format(self.last))
             return "Array({})".format(", ".join(attrs))
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 if not mt.check_match(typ.code == gdb.TYPE_CODE_ARRAY):
                     return False
@@ -346,17 +365,17 @@ class Match(object):
 
                 return True
 
-    class Struct(BasePattern):
+    class Struct(TypePattern):
         """Matches structure types and their fields."""
 
-        def __init__(self, *fields):
+        def __init__(self, *fields: Match.Field):
             self.fields = fields
 
         @property
-        def short_descr(self):
+        def short_descr(self) -> str:
             return "Struct({} fields)".format(len(self.fields))
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 if typ.code != gdb.TYPE_CODE_STRUCT:
                     return mt.tag_mismatch()
@@ -369,7 +388,10 @@ class Match(object):
                     fields = [
                         field
                         for field in typ.fields()
-                        if field.name.lower() == field.name
+                        if (
+                            field.name is not None
+                            and field.name.lower() == field.name
+                        )
                     ]
                     # ... But we might want to match structures that are
                     # artificial. In such cases, all fields are artificial.
@@ -380,24 +402,26 @@ class Match(object):
                         return mt.tag_mismatch()
 
                     for field_pattern, value_field in zip(self.fields, fields):
-                        if not field_pattern._match(value_field, mt):
+                        if not field_pattern._match_field(value_field, mt):
                             return mt.tag_mismatch()
                 return True
 
     class Field(BasePattern):
         """Matches a structure field."""
 
-        def __init__(self, name, type=None):
+        def __init__(
+            self, name: str, type: Optional[Match.TypePattern] = None
+        ):
             self.name = name
             self.type = type
 
         @property
-        def short_descr(self):
+        def short_descr(self) -> str:
             return "Field({})".format(
                 "name={}".format(self.name) if self.name else ""
             )
 
-        def _match(self, field, mt):
+        def _match_field(self, field: gdb.Field, mt: MatchTrace) -> bool:
             with mt.scope(self, field):
                 if self.name is not None and self.name != field.name:
                     return mt.tag_mismatch()
@@ -406,9 +430,9 @@ class Match(object):
                     return mt.tag_mismatch()
                 return True
 
-    class Char(BasePattern):
+    class Char(TypePattern):
         """Mathes all character types."""
 
-        def _match(self, typ, mt):
+        def _match(self, typ: gdb.Type, mt: MatchTrace) -> bool:
             with mt.scope(self, typ):
                 return mt.check_match(typ.code == gdb.TYPE_CODE_CHAR)
