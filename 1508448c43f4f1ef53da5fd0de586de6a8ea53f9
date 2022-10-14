@@ -1,0 +1,6 @@
+Code-Review+2: Tom Tromey <tromey@adacore.com>
+Submitted-by: Pierre-Marie de Rodat <derodat@adacore.com>
+Submitted-at: Fri, 14 Oct 2022 07:57:32 +0000
+Reviewed-on: https://git.adacore-it.com/c/gnat-gdb-scripts/+/123021
+Project: gnat-gdb-scripts
+Branch: refs/heads/master
